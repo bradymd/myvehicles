@@ -29,12 +29,7 @@ workflows:
         BUNDLE_ID: "com.bradymd.myvehicles"
 
     triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
+      events: []
 
     scripts:
       # ── Code signing ──────────────────────────────────────────────
