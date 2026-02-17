@@ -41,6 +41,14 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MyVehicles needs access to your photo library to attach documents and photos to your vehicle records.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>MyVehicles needs camera access to photograph documents, MOT certificates, and vehicle details.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MyVehicles uses your location to show your position on the emergency breakdown screen.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MyVehicles uses your location to show your position on the emergency breakdown screen.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

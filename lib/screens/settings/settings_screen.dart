@@ -69,8 +69,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           dialogTitle: 'Save Backup',
           fileName: p.basename(zipPath),
           initialDirectory: downloadsDir?.path,
-          type: FileType.custom,
-          allowedExtensions: ['zip'],
         );
         if (savePath != null) {
           await File(zipPath).copy(savePath);
