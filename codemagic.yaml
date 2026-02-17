@@ -49,7 +49,7 @@ workflows:
           # Fetch or create provisioning profile + certificate
           app-store-connect fetch-signing-files "com.bradymd.myvehicles" \
             --type IOS_APP_STORE \
-            --certificate-key=/tmp/cert_key.pem \
+            --certificate-key=@file:/tmp/cert_key.pem \
             --create
 
           # Debug: check what profiles were downloaded
@@ -60,7 +60,7 @@ workflows:
           keychain initialize
           app-store-connect certificates list \
             --type IOS_DISTRIBUTION \
-            --certificate-key=/tmp/cert_key.pem \
+            --certificate-key=@file:/tmp/cert_key.pem \
             --save
           keychain add-certificates
 
