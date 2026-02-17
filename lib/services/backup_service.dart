@@ -23,7 +23,7 @@ class BackupService {
 
     final zipData = ZipEncoder().encode(archive);
 
-    final timestamp = DateFormat('yyyy-MM-dd-HH-mm').format(DateTime.now());
+    final timestamp = DateFormat('yyyy-MM-dd-HH-mm-ss').format(DateTime.now());
     final tempDir = await getTemporaryDirectory();
     final zipPath =
         p.join(tempDir.path, 'backup-myvehicles-$timestamp.zip');

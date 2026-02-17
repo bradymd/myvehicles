@@ -65,17 +65,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
       } else {
         final downloadsDir = await getDownloadsDirectory();
-        final savePath = await FilePicker.platform.saveFile(
-          dialogTitle: 'Save Backup',
-          fileName: p.basename(zipPath),
-          initialDirectory: downloadsDir?.path,
-        );
-        if (savePath != null) {
-          await File(zipPath).copy(savePath);
+        final backupName = p.basename(zipPath);
+        if (downloadsDir != null) {
+          final destPath = p.join(downloadsDir.path, backupName);
+          await File(zipPath).copy(destPath);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Backup saved successfully')),
+              SnackBar(content: Text('Saved to Downloads/$backupName')),
             );
+          }
+        } else {
+          final savePath = await FilePicker.platform.saveFile(
+            dialogTitle: 'Save Backup',
+            fileName: backupName,
+          );
+          if (savePath != null) {
+            await File(zipPath).copy(savePath);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Backup saved successfully')),
+              );
+            }
           }
         }
       }
@@ -154,9 +164,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _restoreFromFile() async {
+    final downloadsDir = await getDownloadsDirectory();
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
+      initialDirectory: downloadsDir?.path,
     );
     if (result == null || result.files.isEmpty) return;
     final filePath = result.files.single.path;
