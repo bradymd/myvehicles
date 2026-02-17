@@ -41,8 +41,20 @@ workflows:
 
     scripts:
       # ── Code signing ──────────────────────────────────────────────
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "com.bradymd.myvehicles" \
+            --type IOS_APP_STORE \
+            --create
+
       - name: Set up code signing
         script: |
+          keychain initialize
+          app-store-connect certificates list \
+            --type IOS_DISTRIBUTION \
+            --certificate-key=@env:CM_CERTIFICATE_PRIVATE_KEY \
+            --save
+          keychain add-certificates
           xcode-project use-profiles
 
       # ── Dependencies ──────────────────────────────────────────────
