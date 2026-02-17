@@ -298,7 +298,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return AppScaffold(
       title: 'Settings & Tools',
       centerTitle: true,
-      showBackButton: true,
+      showBackButton: false,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

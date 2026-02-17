@@ -19,6 +19,7 @@ class AppScaffold extends StatelessWidget {
     this.showMenuButton = true,
     this.centerTitle = false,
     this.isHome = false,
+    this.showCarIcon = true,
   });
 
   final String title;
@@ -33,6 +34,7 @@ class AppScaffold extends StatelessWidget {
   final bool showMenuButton;
   final bool centerTitle;
   final bool isHome;
+  final bool showCarIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -99,19 +101,21 @@ class AppScaffold extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    width: 64,
-                                    height: 64,
-                                    clipBehavior: Clip.antiAlias,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
+                                  if (showCarIcon) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      width: 64,
+                                      height: 64,
+                                      clipBehavior: Clip.antiAlias,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/car-icon.png',
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    child: Image.asset(
-                                      'assets/images/car-icon.png',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                  ],
                                 ],
                               ),
                         ),

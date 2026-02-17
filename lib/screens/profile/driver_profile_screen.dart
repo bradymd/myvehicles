@@ -19,7 +19,7 @@ class DriverProfileScreen extends ConsumerWidget {
     return AppScaffold(
       title: 'Driver Profiles',
       centerTitle: true,
-      showBackButton: true,
+      showBackButton: false,
       body: profilesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),

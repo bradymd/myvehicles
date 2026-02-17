@@ -17,10 +17,10 @@ class AboutScreen extends ConsumerWidget {
     final tipJar = ref.watch(tipJarProvider);
 
     return AppScaffold(
-      title: 'About',
+      title: 'My Vehicles',
       centerTitle: true,
-      showBackButton: true,
-      showMenuButton: false,
+      showBackButton: false,
+      showMenuButton: true,
       body: ListView(
         padding: const EdgeInsets.all(32),
         children: [
@@ -28,9 +28,10 @@ class AboutScreen extends ConsumerWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Image.asset(
-                'assets/images/car_icon.png',
+                'assets/images/rescue-character.png',
                 width: 100,
                 height: 100,
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -93,18 +94,6 @@ class AboutScreen extends ConsumerWidget {
           const SizedBox(height: 32),
 
           // Tip jar
-          Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset(
-                'assets/images/rescue-character.png',
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
           Center(
             child: Text(
               'Support Development',

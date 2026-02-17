@@ -146,22 +146,6 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
     );
   }
 
-  Widget _infoRow(String label, String value) {
-    if (value.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-              width: 130,
-              child: Text(label, style: AppTextStyles.caption)),
-          Expanded(child: Text(value, style: AppTextStyles.bodyBold)),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final recordsAsync = ref.watch(motRecordsProvider(widget.vehicleId));
@@ -239,64 +223,85 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
 
   Widget _buildDisplay(MOTRecord record, Vehicle? vehicle) {
     final passed = record.result == 'pass';
-    final resultColor = passed ? AppColors.success : AppColors.danger;
-    final resultIcon = passed
-        ? Icons.check_circle_rounded
-        : Icons.cancel_rounded;
-    final resultLabel = passed ? 'PASS' : 'FAIL';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionHeader(
             title: 'MOT Details', icon: Icons.verified_rounded),
-        if (vehicle != null) ...[
-          _infoRow('Vehicle', vehicle.shortDescription),
-          _infoRow('Registration', vehicle.registration.toUpperCase()),
-        ],
-        // Test Date with PASS/FAIL badge
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                  width: 130,
-                  child: Text('Test Date', style: AppTextStyles.caption)),
-              Expanded(
-                child: Text(formatDateUK(record.testDate),
-                    style: AppTextStyles.bodyBold),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                decoration: BoxDecoration(
-                  color: passed ? AppColors.softGreen : AppColors.softRed,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(resultIcon, color: resultColor, size: 16),
-                    const SizedBox(width: 4),
+        const SizedBox(height: 8),
+
+        // Two-column layout: data left, icon right
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left column — MOT data
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Line 1: reg make model
+                  if (vehicle != null) ...[
                     Text(
-                      resultLabel,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: resultColor,
-                      ),
+                      '${vehicle.registration.toUpperCase()}  ${vehicle.make} ${vehicle.model}',
+                      style: AppTextStyles.bodyBold,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  // Line 2: valid dates
+                  if (record.testDate.isNotEmpty &&
+                      record.expiryDate.isNotEmpty)
+                    Text(
+                      'Valid ${formatDateUK(record.testDate)} to ${formatDateUK(record.expiryDate)}',
+                      style: AppTextStyles.body,
+                    )
+                  else if (record.testDate.isNotEmpty)
+                    Text(
+                      formatDateUK(record.testDate),
+                      style: AppTextStyles.body,
+                    ),
+                  // Line 3: test centre + mileage
+                  if (record.testCentre.isNotEmpty ||
+                      record.mileage > 0) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        if (record.testCentre.isNotEmpty)
+                          Expanded(
+                            child: Text(
+                              record.testCentre,
+                              style: AppTextStyles.caption,
+                            ),
+                          )
+                        else
+                          const Spacer(),
+                        if (record.mileage > 0)
+                          Text(
+                            '${record.mileage} mi',
+                            style: AppTextStyles.caption,
+                          ),
+                      ],
                     ),
                   ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Right — result icon
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: ClipOval(
+                child: Image.asset(
+                  passed
+                      ? 'assets/images/mot-passed.png'
+                      : 'assets/images/mot-failed.png',
+                  fit: BoxFit.cover,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        _infoRow('Expiry Date', formatDateUK(record.expiryDate)),
-        _infoRow('Test Centre', record.testCentre),
-        _infoRow('Mileage',
-            record.mileage > 0 ? '${record.mileage} miles' : ''),
 
         if (record.advisories.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -336,6 +341,7 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
       ],
     );
   }
+
 
   Widget _buildForm(Vehicle? vehicle) {
     final vehicleLabel = vehicle != null

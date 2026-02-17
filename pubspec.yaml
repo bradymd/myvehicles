@@ -53,4 +53,6 @@ flutter:
     - assets/images/crash-recovery.png
     - assets/images/mot-button.png
     - assets/images/rescue-character.png
+    - assets/images/mot-passed.png
+    - assets/images/mot-failed.png
     - assets/demo_backup.zip

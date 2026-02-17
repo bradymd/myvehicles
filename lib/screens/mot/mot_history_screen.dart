@@ -48,11 +48,9 @@ class MOTHistoryScreen extends ConsumerWidget {
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (records) {
                 if (records.isEmpty) {
-                  return EmptyState(
+                  return const EmptyState(
                     message: 'No MOT records',
-                    subtitle: 'Add your first MOT record',
-                    actionLabel: 'Add MOT',
-                    onAction: () => context.push('/add-mot/$vehicleId'),
+                    subtitle: 'Tap + to add your first MOT record',
                     imagePath: 'assets/images/mot-button.png',
                   );
                 }
@@ -75,11 +73,19 @@ class MOTHistoryScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Line 1: reg make model ... PASS/FAIL
                         Row(
                           children: [
+                            if (vehicleName != null)
+                              Expanded(
+                                child: Text(
+                                  '${vehicleName.registration.toUpperCase()}  ${vehicleName.make} ${vehicleName.model}',
+                                  style: AppTextStyles.bodyBold,
+                                ),
+                              ),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 4),
+                                  horizontal: 10, vertical: 3),
                               decoration: BoxDecoration(
                                 color: passed
                                     ? AppColors.softGreen
@@ -90,37 +96,52 @@ class MOTHistoryScreen extends ConsumerWidget {
                                 passed ? 'PASS' : 'FAIL',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
+                                  fontSize: 13,
                                   color: passed
                                       ? AppColors.success
                                       : AppColors.danger,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    formatDateUK(record.testDate),
-                                    style: AppTextStyles.bodyBold,
-                                  ),
-                                  if (record.testCentre.isNotEmpty)
-                                    Text(
-                                      record.testCentre,
-                                      style: AppTextStyles.caption,
-                                    ),
-                                ],
-                              ),
-                            ),
-                            if (record.mileage > 0)
-                              Text(
-                                '${record.mileage} mi',
-                                style: AppTextStyles.caption,
-                              ),
                           ],
                         ),
+                        // Line 2: Valid date to date
+                        const SizedBox(height: 4),
+                        if (record.testDate.isNotEmpty &&
+                            record.expiryDate.isNotEmpty)
+                          Text(
+                            'Valid ${formatDateUK(record.testDate)} to ${formatDateUK(record.expiryDate)}',
+                            style: AppTextStyles.caption,
+                          )
+                        else if (record.testDate.isNotEmpty)
+                          Text(
+                            formatDateUK(record.testDate),
+                            style: AppTextStyles.caption,
+                          ),
+                        // Line 3: test centre ... mileage
+                        if (record.testCentre.isNotEmpty ||
+                            record.mileage > 0) ...[
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              if (record.testCentre.isNotEmpty)
+                                Expanded(
+                                  child: Text(
+                                    record.testCentre,
+                                    style: AppTextStyles.caption,
+                                  ),
+                                )
+                              else
+                                const Spacer(),
+                              if (record.mileage > 0)
+                                Text(
+                                  '${record.mileage} mi',
+                                  style: AppTextStyles.caption,
+                                ),
+                            ],
+                          ),
+                        ],
+                        // Advisories
                         if (record.advisories.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Container(
@@ -147,13 +168,6 @@ class MOTHistoryScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                        if (record.expiryDate.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            'Expires: ${formatDateUK(record.expiryDate)}',
-                            style: AppTextStyles.caption,
                           ),
                         ],
                       ],
