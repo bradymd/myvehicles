@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DocumentService {
   static Future<String> get _docsDir async {
@@ -39,15 +39,7 @@ class DocumentService {
   }
 
   static Future<void> openFile(String localPath) async {
-    // On Linux, canLaunchUrl often fails for file:// URIs, so use xdg-open
-    if (!kIsWeb && Platform.isLinux) {
-      await Process.run('xdg-open', [localPath]);
-      return;
-    }
-    final uri = Uri.file(localPath);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    await OpenFile.open(localPath);
   }
 
   static String getFileType(String path) {
