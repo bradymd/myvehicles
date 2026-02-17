@@ -41,18 +41,22 @@ workflows:
 
     scripts:
       # ── Code signing ──────────────────────────────────────────────
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "com.bradymd.myvehicles" \
-            --type IOS_APP_STORE \
-            --create
-
       - name: Set up code signing
         script: |
+          # Generate a private key for certificate creation
+          openssl genrsa -out /tmp/cert_key.pem 2048
+
+          # Fetch or create provisioning profile + certificate
+          app-store-connect fetch-signing-files "com.bradymd.myvehicles" \
+            --type IOS_APP_STORE \
+            --certificate-key=/tmp/cert_key.pem \
+            --create
+
+          # Set up keychain with the certificates
           keychain initialize
           app-store-connect certificates list \
             --type IOS_DISTRIBUTION \
-            --certificate-key=@env:CM_CERTIFICATE_PRIVATE_KEY \
+            --certificate-key=/tmp/cert_key.pem \
             --save
           keychain add-certificates
           xcode-project use-profiles
