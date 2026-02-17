@@ -3,6 +3,7 @@ import 'package:archive/archive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/sqlite3.dart' as sql;
 
 class AutoBackupInfo {
   final DateTime timestamp;
@@ -97,7 +98,54 @@ class BackupService {
       }
     }
 
+    // Rewrite document paths to match this device's app directory
+    await _rewriteDocumentPaths(appDir.path);
+
     return true;
+  }
+
+  /// After restore, rewrite absolute file paths in the DB to match
+  /// this device's app documents directory.
+  static Future<void> _rewriteDocumentPaths(String appDirPath) async {
+    final dbPath = p.join(appDirPath, _dbFilename);
+    final newDocsDir = p.join(appDirPath, _docsFolder);
+
+    final db = sql.sqlite3.open(dbPath);
+    try {
+      // Rewrite document_refs.local_path
+      _rewriteColumn(db, 'document_refs', 'local_path', newDocsDir);
+
+      // Rewrite driver_profiles photo paths
+      _rewriteColumn(db, 'driver_profiles', 'photo_path', newDocsDir);
+      _rewriteColumn(db, 'driver_profiles', 'licence_photo_front', newDocsDir);
+      _rewriteColumn(db, 'driver_profiles', 'licence_photo_back', newDocsDir);
+
+      // Rewrite vehicles.photo_path
+      _rewriteColumn(db, 'vehicles', 'photo_path', newDocsDir);
+    } finally {
+      db.dispose();
+    }
+  }
+
+  static void _rewriteColumn(
+    sql.Database db,
+    String table,
+    String column,
+    String newDocsDir,
+  ) {
+    final rows = db.select(
+      'SELECT id, $column FROM $table WHERE $column != ""',
+    );
+    for (final row in rows) {
+      final id = row['id'] as String;
+      final oldPath = row[column] as String;
+      final filename = p.basename(oldPath);
+      final newPath = p.join(newDocsDir, filename);
+      db.execute(
+        'UPDATE $table SET $column = ? WHERE id = ?',
+        [newPath, id],
+      );
+    }
   }
 
   // --- Private helpers ---
