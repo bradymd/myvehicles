@@ -134,7 +134,7 @@ class BackupService {
     String newDocsDir,
   ) {
     final rows = db.select(
-      'SELECT id, $column FROM $table WHERE $column != ""',
+      "SELECT id, $column FROM $table WHERE $column != ''",
     );
     for (final row in rows) {
       final id = row['id'] as String;
