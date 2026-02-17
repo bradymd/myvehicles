@@ -40,35 +40,19 @@ workflows:
       # ── Code signing ──────────────────────────────────────────────
       - name: Set up code signing
         script: |
-          set -e
-          set -x
-
-          # Generate a private key for certificate creation
-          openssl genrsa -out /tmp/cert_key.pem 2048
-
           # Fetch or create provisioning profile + certificate
           app-store-connect fetch-signing-files "com.bradymd.myvehicles" \
             --type IOS_APP_STORE \
-            --certificate-key=@file:/tmp/cert_key.pem \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
-
-          # Debug: check what profiles were downloaded
-          echo "=== Downloaded profiles ==="
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles directory"
 
           # Set up keychain with the certificates
           keychain initialize
           app-store-connect certificates list \
             --type IOS_DISTRIBUTION \
-            --certificate-key=@file:/tmp/cert_key.pem \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --save
           keychain add-certificates
-
-          # Debug: check keychain
-          echo "=== Keychain certificates ==="
-          security find-identity -v -p codesigning
-
-          # Apply profiles to Xcode project
           xcode-project use-profiles
 
       # ── Dependencies ──────────────────────────────────────────────
