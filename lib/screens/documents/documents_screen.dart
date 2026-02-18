@@ -24,11 +24,10 @@ class DocumentsScreen extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Documents',
+      useOverlayNav: true,
       showBackButton: true,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _pickDocument(context, ref),
-        child: const Icon(Icons.add_rounded),
-      ),
+      overlayFabIcon: Icons.add_rounded,
+      overlayFabOnPressed: () => _pickDocument(context, ref),
       body: docsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),

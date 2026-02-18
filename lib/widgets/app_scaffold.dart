@@ -84,7 +84,10 @@ class AppScaffold extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 8),
                           child: a,
                         )),
-                  const _OverlayMenuButton(),
+                  if (showMenuButton)
+                    const _OverlayMenuButton()
+                  else
+                    const SizedBox(width: 42),
                 ],
               ),
             ),

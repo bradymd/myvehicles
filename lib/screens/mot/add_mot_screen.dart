@@ -12,7 +12,6 @@ import 'package:my_vehicles/utils/id_generator.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/document_attachments.dart';
 import 'package:my_vehicles/models/vehicle.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 
 class AddMOTScreen extends ConsumerStatefulWidget {
   const AddMOTScreen({
@@ -156,10 +155,14 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
     // For new records, just show the form
     if (!isExistingRecord) {
       return AppScaffold(
-        title: '',
-        centerTitle: true,
+        title: 'Add MOT',
+        useOverlayNav: true,
         showBackButton: true,
         showMenuButton: false,
+        overlayFabIcon: Icons.check_rounded,
+        overlayFabOnPressed: () {
+          if (_formKey.currentState!.validate()) _save();
+        },
         body: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -186,27 +189,12 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing MOT' : 'MOT Details',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: _isEditing
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _cancel,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    onPressed: _save,
-                  ),
-                ]
-              : [
-                  IconButton(
-                    icon: const Icon(Icons.edit_rounded,
-                        color: Colors.white),
-                    onPressed: _startEditing,
-                  ),
-                ],
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          overlayFabOnPressed: _isEditing ? _save : _startEditing,
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: _isEditing
@@ -227,8 +215,7 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'MOT Details', icon: Icons.verified_rounded),
+        Text('MOT Details', style: AppTextStyles.subheading),
         const SizedBox(height: 8),
 
         // Two-column layout: data left, icon right
@@ -305,8 +292,7 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
 
         if (record.advisories.isNotEmpty) ...[
           const SizedBox(height: 16),
-          const SectionHeader(
-              title: 'Advisories', icon: Icons.warning_amber_rounded),
+          Text('Advisories', style: AppTextStyles.subheading),
           const SizedBox(height: 4),
           Container(
             width: double.infinity,
@@ -353,8 +339,6 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'MOT Details', icon: Icons.verified_rounded),
         const SizedBox(height: 8),
         if (vehicleLabel.isNotEmpty)
           TextFormField(

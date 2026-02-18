@@ -12,7 +12,6 @@ import 'package:my_vehicles/utils/id_generator.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/document_attachments.dart';
 import 'package:my_vehicles/models/vehicle.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 
 class AddServiceScreen extends ConsumerStatefulWidget {
   const AddServiceScreen({
@@ -184,10 +183,14 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
     // For new entries, just show the form
     if (!isExistingEntry) {
       return AppScaffold(
-        title: '',
-        centerTitle: true,
+        title: 'Add Service',
+        useOverlayNav: true,
         showBackButton: true,
         showMenuButton: false,
+        overlayFabIcon: Icons.check_rounded,
+        overlayFabOnPressed: () {
+          if (_formKey.currentState!.validate()) _save();
+        },
         body: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -214,27 +217,12 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing Service' : 'Service Details',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: _isEditing
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _cancel,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    onPressed: _save,
-                  ),
-                ]
-              : [
-                  IconButton(
-                    icon: const Icon(Icons.edit_rounded,
-                        color: Colors.white),
-                    onPressed: _startEditing,
-                  ),
-                ],
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          overlayFabOnPressed: _isEditing ? _save : _startEditing,
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: _isEditing
@@ -258,8 +246,6 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'Service Details', icon: Icons.build_rounded),
         if (vehicle != null) ...[
           _infoRow('Vehicle', vehicle.shortDescription),
           _infoRow('Registration', vehicle.registration.toUpperCase()),
@@ -276,8 +262,7 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
         if (entry.nextServiceDate.isNotEmpty ||
             entry.nextServiceMileage > 0) ...[
           const SizedBox(height: 16),
-          const SectionHeader(
-              title: 'Next Service', icon: Icons.event_repeat_rounded),
+          Text('Next Service', style: AppTextStyles.subheading),
           _infoRow(
               'Next Service Date', formatDateUK(entry.nextServiceDate)),
           _infoRow(
@@ -318,8 +303,6 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'Service Details', icon: Icons.build_rounded),
         const SizedBox(height: 8),
         if (vehicleLabel.isNotEmpty)
           TextFormField(
@@ -394,9 +377,7 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
         ),
 
         const SizedBox(height: 16),
-        const SectionHeader(
-            title: 'Next Service',
-            icon: Icons.event_repeat_rounded),
+        Text('Next Service', style: AppTextStyles.subheading),
         const SizedBox(height: 8),
         TextFormField(
           controller: _nextServiceDateController,

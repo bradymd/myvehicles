@@ -143,10 +143,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (!mounted) return;
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Backup restored successfully')),
-        );
-        context.go('/');
+        // Run integrity check automatically after restore
+        final db = ref.read(databaseProvider);
+        final integrity = await IntegrityService.runCheck(db);
+
+        if (!mounted) return;
+
+        if (integrity.hasIssues) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Restored with ${integrity.issues.length} issue${integrity.issues.length == 1 ? '' : 's'} — check results',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          _showIntegrityResult(integrity);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Backup restored successfully')),
+          );
+          context.go('/');
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

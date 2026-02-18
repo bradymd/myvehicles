@@ -12,7 +12,7 @@ import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/id_generator.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
+
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key, this.profileId});
@@ -195,8 +195,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: widget.profileId != null ? 'Edit Profile' : 'Add Profile',
+      useOverlayNav: true,
       showBackButton: true,
       showMenuButton: false,
+      overlayFabIcon: Icons.check_rounded,
+      overlayFabOnPressed: () {
+        if (_formKey.currentState!.validate()) _save();
+      },
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -204,8 +209,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionHeader(
-                  title: 'Personal', icon: Icons.person_rounded),
+              const SizedBox(height: 8),
+              Text('Personal', style: AppTextStyles.subheading),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Full Name'),
@@ -217,9 +223,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 maxLines: 3,
               ),
 
-              const SectionHeader(
-                  title: 'Driving Licence',
-                  icon: Icons.credit_card_rounded),
+              const SizedBox(height: 16),
+              Text('Driving Licence', style: AppTextStyles.subheading),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _licenceNumberController,
                 decoration:
@@ -273,9 +279,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ],
               ),
 
-              const SectionHeader(
-                  title: 'Emergency Contact',
-                  icon: Icons.emergency_rounded),
+              const SizedBox(height: 16),
+              Text('Emergency Contact', style: AppTextStyles.subheading),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _emergencyNameController,
                 decoration: const InputDecoration(labelText: 'Name'),
@@ -288,17 +294,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 keyboardType: TextInputType.phone,
               ),
 
-              const SectionHeader(
-                  title: 'Medical',
-                  icon: Icons.medical_information_rounded),
+              const SizedBox(height: 16),
+              Text('Medical', style: AppTextStyles.subheading),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _bloodTypeController,
                 decoration: const InputDecoration(
                     labelText: 'Blood Type (e.g. A+, O-)'),
               ),
 
-              const SectionHeader(
-                  title: 'Notes', icon: Icons.note_rounded),
+              const SizedBox(height: 16),
+              Text('Notes', style: AppTextStyles.subheading),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _notesController,
                 decoration: const InputDecoration(labelText: 'Notes'),

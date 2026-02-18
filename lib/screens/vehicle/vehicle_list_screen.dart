@@ -14,13 +14,12 @@ class VehicleListScreen extends ConsumerWidget {
     final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return AppScaffold(
-      title: '',
+      title: 'My Vehicles',
+      useOverlayNav: true,
       showBackButton: true,
       onBack: () => context.go('/'),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add-vehicle'),
-        child: const Icon(Icons.add_rounded),
-      ),
+      overlayFabIcon: Icons.add_rounded,
+      overlayFabOnPressed: () => context.push('/add-vehicle'),
       body: vehiclesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),

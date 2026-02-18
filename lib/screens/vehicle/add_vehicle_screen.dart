@@ -196,8 +196,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: isEditing ? 'Edit Vehicle' : 'Add Vehicle',
+      useOverlayNav: true,
       showBackButton: true,
       showMenuButton: false,
+      overlayFabIcon: Icons.check_rounded,
+      overlayFabOnPressed: () {
+        if (_formKey.currentState!.validate()) _save();
+      },
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
