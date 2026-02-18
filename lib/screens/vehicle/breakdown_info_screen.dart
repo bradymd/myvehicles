@@ -7,7 +7,6 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/phone_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/document_attachments.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 
 class BreakdownInfoScreen extends ConsumerStatefulWidget {
   const BreakdownInfoScreen({super.key, required this.vehicleId});
@@ -131,26 +130,12 @@ class _BreakdownInfoScreenState extends ConsumerState<BreakdownInfoScreen> {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing Breakdown' : 'Breakdown Cover',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: _isEditing
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _cancel,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    onPressed: _save,
-                  ),
-                ]
-              : [
-                  IconButton(
-                    icon: const Icon(Icons.edit_rounded, color: Colors.white),
-                    onPressed: () => _startEditing(vehicle),
-                  ),
-                ],
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          overlayFabOnPressed: _isEditing ? _save : () => _startEditing(vehicle),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: _isEditing
@@ -166,8 +151,6 @@ class _BreakdownInfoScreenState extends ConsumerState<BreakdownInfoScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'Breakdown Cover', icon: Icons.car_repair_rounded),
         _infoRow('Vehicle', vehicle.shortDescription),
         _infoRow('Registration', vehicle.registration.toUpperCase()),
         _infoRow('Provider', vehicle.breakdownProvider),
@@ -175,8 +158,8 @@ class _BreakdownInfoScreenState extends ConsumerState<BreakdownInfoScreen> {
         _infoRow('Contact', vehicle.breakdownContact),
         if (vehicle.breakdownNotes.isNotEmpty) ...[
           const SizedBox(height: 12),
-          const SectionHeader(
-              title: 'Notes', icon: Icons.notes_rounded),
+          const SizedBox(height: 4),
+          Text('Notes', style: AppTextStyles.caption),
           const SizedBox(height: 4),
           Container(
             width: double.infinity,
@@ -227,9 +210,6 @@ class _BreakdownInfoScreenState extends ConsumerState<BreakdownInfoScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-              title: 'Breakdown Cover', icon: Icons.car_repair_rounded),
-          const SizedBox(height: 8),
           if (vehicleLabel.isNotEmpty)
             TextFormField(
               initialValue: vehicleLabel,

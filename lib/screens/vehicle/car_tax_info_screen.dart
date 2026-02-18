@@ -7,7 +7,6 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/document_attachments.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 
 class CarTaxInfoScreen extends ConsumerStatefulWidget {
   const CarTaxInfoScreen({super.key, required this.vehicleId});
@@ -109,29 +108,20 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
             vehicle.ownership == 'pch';
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing Car Tax' : 'Car Tax',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: isLeased
-              ? []
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: isLeased
+              ? null
               : _isEditing
-                  ? [
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: _cancel,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.check, color: Colors.white),
-                        onPressed: _save,
-                      ),
-                    ]
-                  : [
-                      IconButton(
-                        icon: const Icon(Icons.edit_rounded,
-                            color: Colors.white),
-                        onPressed: () => _startEditing(vehicle),
-                      ),
-                    ],
+                  ? Icons.check_rounded
+                  : Icons.edit_rounded,
+          overlayFabOnPressed: isLeased
+              ? null
+              : _isEditing
+                  ? _save
+                  : () => _startEditing(vehicle),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -156,9 +146,7 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'Car Tax', icon: Icons.receipt_long_rounded),
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -168,9 +156,6 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
           ),
           child: Column(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 40, color: AppColors.warning),
-              const SizedBox(height: 12),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -219,8 +204,6 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'Car Tax', icon: Icons.receipt_long_rounded),
         _infoRow('Tax Due Date', dateStr.isNotEmpty ? formatDateUK(dateStr) : ''),
         if (dateStr.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -289,9 +272,6 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-              title: 'Car Tax', icon: Icons.receipt_long_rounded),
-          const SizedBox(height: 8),
           TextFormField(
             controller: _taxDueDateCtrl,
             decoration: InputDecoration(

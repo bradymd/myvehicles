@@ -8,7 +8,6 @@ import 'package:my_vehicles/providers/vehicle_provider.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/document_attachments.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 
 class InsuranceInfoScreen extends ConsumerStatefulWidget {
@@ -148,8 +147,11 @@ class _InsuranceInfoScreenState extends ConsumerState<InsuranceInfoScreen> {
   Widget _buildDriversRow(String driversStr) {
     if (driversStr.isEmpty) return const SizedBox.shrink();
 
-    final profile = ref.watch(profileProvider).valueOrNull;
-    final profileName = profile?.name.trim().toLowerCase() ?? '';
+    final profiles = ref.watch(profilesProvider).valueOrNull ?? [];
+    final profileNames = profiles
+        .map((p) => p.name.trim().toLowerCase())
+        .where((n) => n.isNotEmpty)
+        .toSet();
 
     // Split drivers by comma, newline, or semicolon
     final drivers = driversStr
@@ -172,8 +174,7 @@ class _InsuranceInfoScreenState extends ConsumerState<InsuranceInfoScreen> {
               runSpacing: 4,
               children: [
                 for (int i = 0; i < drivers.length; i++) ...[
-                  if (profileName.isNotEmpty &&
-                      drivers[i].trim().toLowerCase() == profileName)
+                  if (profileNames.contains(drivers[i].trim().toLowerCase()))
                     GestureDetector(
                       onTap: () => context.push('/profile'),
                       child: Container(
@@ -224,26 +225,12 @@ class _InsuranceInfoScreenState extends ConsumerState<InsuranceInfoScreen> {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing Insurance' : 'Insurance Details',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: _isEditing
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _cancel,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    onPressed: _save,
-                  ),
-                ]
-              : [
-                  IconButton(
-                    icon: const Icon(Icons.edit_rounded, color: Colors.white),
-                    onPressed: () => _startEditing(vehicle),
-                  ),
-                ],
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          overlayFabOnPressed: _isEditing ? _save : () => _startEditing(vehicle),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: _isEditing ? _buildForm(vehicle) : _buildDisplay(vehicle),
@@ -264,8 +251,6 @@ class _InsuranceInfoScreenState extends ConsumerState<InsuranceInfoScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-            title: 'Insurance Details', icon: Icons.shield_rounded),
         _infoRow('Vehicle', vehicle.registration.isNotEmpty
             ? '${vehicle.registration.toUpperCase()} \u2022 ${vehicle.shortDescription}'
             : vehicle.shortDescription),
@@ -299,9 +284,6 @@ class _InsuranceInfoScreenState extends ConsumerState<InsuranceInfoScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-              title: 'Insurance Details', icon: Icons.shield_rounded),
-          const SizedBox(height: 8),
           TextFormField(
             initialValue: vehicleLabel,
             decoration: const InputDecoration(

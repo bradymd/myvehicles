@@ -8,7 +8,6 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
-import 'package:my_vehicles/widgets/vehicle_page_header.dart';
 
 class MOTHistoryScreen extends ConsumerWidget {
   const MOTHistoryScreen({super.key, required this.vehicleId});
@@ -22,24 +21,31 @@ class MOTHistoryScreen extends ConsumerWidget {
         ?.where((v) => v.id == vehicleId)
         .firstOrNull;
 
+    final vehicleLabel = vehicleName != null
+        ? [
+            if (vehicleName.registration.isNotEmpty)
+              vehicleName.registration.toUpperCase(),
+            vehicleName.shortDescription,
+          ].join('  ')
+        : '';
+
     return AppScaffold(
-      title: '',
-      centerTitle: true,
+      title: 'MOT History',
+      useOverlayNav: true,
       showBackButton: true,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add-mot/$vehicleId'),
-        child: const Icon(Icons.add_rounded),
-      ),
+      overlayFabIcon: Icons.add_rounded,
+      overlayFabOnPressed: () => context.push('/add-mot/$vehicleId'),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (vehicleName != null)
+          if (vehicleLabel.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: VehiclePageHeader(
-                pageTitle: 'MOT History',
-                registration: vehicleName.registration,
-                vehicleDescription: vehicleName.shortDescription,
+              child: Text(
+                'Vehicle:  $vehicleLabel',
+                style: AppTextStyles.bodyBold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           Expanded(

@@ -17,10 +17,8 @@ class AboutScreen extends ConsumerWidget {
     final tipJar = ref.watch(tipJarProvider);
 
     return AppScaffold(
-      title: '',
-      centerTitle: true,
-      showBackButton: false,
-      showMenuButton: true,
+      title: 'About',
+      useOverlayNav: true,
       body: ListView(
         padding: const EdgeInsets.all(32),
         children: [

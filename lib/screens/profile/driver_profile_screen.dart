@@ -17,9 +17,10 @@ class DriverProfileScreen extends ConsumerWidget {
     final profilesAsync = ref.watch(profilesProvider);
 
     return AppScaffold(
-      title: '',
-      centerTitle: true,
-      showBackButton: false,
+      title: 'Driver Profiles',
+      useOverlayNav: true,
+      overlayFabIcon: Icons.add_rounded,
+      overlayFabOnPressed: () => context.push('/edit-profile'),
       body: profilesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -34,24 +35,11 @@ class DriverProfileScreen extends ConsumerWidget {
             );
           }
 
-          return Stack(
-            children: [
-              ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: profiles.length,
-                itemBuilder: (context, index) =>
-                    _ProfileCard(profile: profiles[index]),
-              ),
-              Positioned(
-                bottom: 24,
-                right: 24,
-                child: FloatingActionButton(
-                  onPressed: () => context.push('/edit-profile'),
-                  backgroundColor: AppColors.primary,
-                  child: const Icon(Icons.add, color: Colors.white),
-                ),
-              ),
-            ],
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: profiles.length,
+            itemBuilder: (context, index) =>
+                _ProfileCard(profile: profiles[index]),
           );
         },
       ),

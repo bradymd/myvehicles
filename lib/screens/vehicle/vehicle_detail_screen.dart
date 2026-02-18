@@ -34,9 +34,8 @@ class VehicleDetailScreen extends ConsumerWidget {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
-          showBackButton: true,
+          useOverlayNav: true,
+          title: 'Vehicle Details',
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -71,29 +70,33 @@ class VehicleDetailScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: _colourFromName(vehicle.colour).withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.directions_car_rounded,
-                                color: AppColors.primary, size: 26),
+                            child: Icon(Icons.directions_car_rounded,
+                                color: _colourFromName(vehicle.colour), size: 26),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Vehicle Details',
-                                    style: AppTextStyles.subheading),
-                                const SizedBox(height: 2),
                                 Text(
                                   [
                                     vehicle.make,
                                     vehicle.model,
                                     vehicle.year,
                                   ].where((s) => s.isNotEmpty).join(' \u2022 '),
-                                  style: AppTextStyles.caption,
+                                  style: AppTextStyles.subheading,
                                   overflow: TextOverflow.ellipsis,
                                 ),
+                                if (vehicle.registration.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    vehicle.registration.toUpperCase(),
+                                    style: AppTextStyles.caption,
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -244,6 +247,24 @@ class VehicleDetailScreen extends ConsumerWidget {
     if (days <= 7) return AppColors.danger;
     if (days <= 30) return AppColors.warning;
     return AppColors.success;
+  }
+
+  Color _colourFromName(String name) {
+    return switch (name.toLowerCase().trim()) {
+      'black' => const Color(0xFF212121),
+      'white' => const Color(0xFF9E9E9E), // darken so icon is visible
+      'silver' || 'grey' || 'gray' => const Color(0xFF757575),
+      'red' => const Color(0xFFC62828),
+      'blue' => const Color(0xFF1565C0),
+      'green' => const Color(0xFF2E7D32),
+      'yellow' => const Color(0xFFF9A825),
+      'orange' => const Color(0xFFEF6C00),
+      'brown' => const Color(0xFF5D4037),
+      'gold' => const Color(0xFFFF8F00),
+      'beige' || 'cream' => const Color(0xFFBCAAA4),
+      'purple' => const Color(0xFF7B1FA2),
+      _ => AppColors.primary,
+    };
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {

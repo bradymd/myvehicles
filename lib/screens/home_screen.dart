@@ -21,12 +21,26 @@ class HomeScreen extends ConsumerWidget {
     return AppScaffold(
       title: 'My Vehicles',
       isHome: true,
-      centerTitle: true,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add-vehicle'),
-        child: const Icon(Icons.add_rounded),
-      ),
-      body: vehiclesAsync.when(
+      useOverlayNav: true,
+      overlayFabIcon: Icons.add_rounded,
+      overlayFabOnPressed: () => context.push('/add-vehicle'),
+      body: Stack(
+        children: [
+          // Background car icon watermark
+          Positioned.fill(
+            child: Center(
+              child: Opacity(
+                opacity: 0.06,
+                child: Image.asset(
+                  'assets/images/car-icon.png',
+                  width: MediaQuery.of(context).size.width * 0.85,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+          // Foreground content
+          vehiclesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (vehicles) {
@@ -107,6 +121,8 @@ class HomeScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+        ],
       ),
     );
   }

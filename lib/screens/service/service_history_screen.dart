@@ -9,7 +9,6 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
-import 'package:my_vehicles/widgets/vehicle_page_header.dart';
 
 class ServiceHistoryScreen extends ConsumerWidget {
   const ServiceHistoryScreen({super.key, required this.vehicleId});
@@ -23,26 +22,23 @@ class ServiceHistoryScreen extends ConsumerWidget {
         ?.where((v) => v.id == vehicleId)
         .firstOrNull;
 
+    final vehicleLabel = vehicleName != null
+        ? [
+            if (vehicleName.registration.isNotEmpty)
+              vehicleName.registration.toUpperCase(),
+            vehicleName.shortDescription,
+          ].join('  ')
+        : '';
+
     return AppScaffold(
-      title: '',
-      centerTitle: true,
+      title: 'Service History',
+      useOverlayNav: true,
       showBackButton: true,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add-service/$vehicleId'),
-        child: const Icon(Icons.add_rounded),
-      ),
+      overlayFabIcon: Icons.add_rounded,
+      overlayFabOnPressed: () => context.push('/add-service/$vehicleId'),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (vehicleName != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: VehiclePageHeader(
-                pageTitle: 'Service History',
-                registration: vehicleName.registration,
-                vehicleDescription: vehicleName.shortDescription,
-              ),
-            ),
           Expanded(
             child: entriesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -62,6 +58,17 @@ class ServiceHistoryScreen extends ConsumerWidget {
                 return ListView(
                   padding: const EdgeInsets.all(16),
             children: [
+              // Vehicle identifier
+              if (vehicleLabel.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'Vehicle:  $vehicleLabel',
+                    style: AppTextStyles.bodyBold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
               // Cost summary
               Card(
                 color: AppColors.softPurple,

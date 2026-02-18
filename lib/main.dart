@@ -6,12 +6,59 @@ import 'package:my_vehicles/services/backup_service.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Fire-and-forget auto-backup before the DB is opened (file is consistent)
-  BackupService.createAutoBackup().catchError((_) {});
-
   runApp(
     const ProviderScope(
-      child: MyVehiclesApp(),
+      child: _AppLifecycleWrapper(child: MyVehiclesApp()),
     ),
   );
+}
+
+/// Watches app lifecycle and triggers auto-backup on close/background,
+/// but no more than once every 4 hours.
+class _AppLifecycleWrapper extends StatefulWidget {
+  const _AppLifecycleWrapper({required this.child});
+  final Widget child;
+
+  @override
+  State<_AppLifecycleWrapper> createState() => _AppLifecycleWrapperState();
+}
+
+class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _backupIfDue();
+    }
+  }
+
+  Future<void> _backupIfDue() async {
+    try {
+      final info = await BackupService.getAutoBackupInfo();
+      if (info != null) {
+        final hoursSince =
+            DateTime.now().difference(info.timestamp).inHours;
+        if (hoursSince < 4) return; // too recent, skip
+      }
+      await BackupService.createAutoBackup();
+    } catch (_) {
+      // Backup is best-effort — never crash the app
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

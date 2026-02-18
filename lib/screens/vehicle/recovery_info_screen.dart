@@ -8,7 +8,6 @@ import 'package:my_vehicles/utils/phone_helpers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/document_attachments.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 
 class RecoveryInfoScreen extends ConsumerStatefulWidget {
   const RecoveryInfoScreen({super.key, required this.vehicleId});
@@ -136,27 +135,12 @@ class _RecoveryInfoScreenState extends ConsumerState<RecoveryInfoScreen> {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing Recovery' : 'Accident & Recovery',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: _isEditing
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _cancel,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    onPressed: _save,
-                  ),
-                ]
-              : [
-                  IconButton(
-                    icon:
-                        const Icon(Icons.edit_rounded, color: Colors.white),
-                    onPressed: () => _startEditing(vehicle),
-                  ),
-                ],
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          overlayFabOnPressed: _isEditing ? _save : () => _startEditing(vehicle),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -188,12 +172,6 @@ class _RecoveryInfoScreenState extends ConsumerState<RecoveryInfoScreen> {
         const SizedBox(height: 20),
 
         // Step-by-step guide
-        const SectionHeader(
-          title: 'What to do after an accident',
-          icon: Icons.checklist_rounded,
-        ),
-        const SizedBox(height: 12),
-
         _StepCard(
           step: 1,
           color: const Color(0xFFFF1744),
@@ -256,10 +234,8 @@ class _RecoveryInfoScreenState extends ConsumerState<RecoveryInfoScreen> {
         const SizedBox(height: 24),
 
         // Recovery contact section
-        const SectionHeader(
-          title: 'Your Recovery Contact',
-          icon: Icons.local_shipping_rounded,
-        ),
+        Text('Your Recovery Contact',
+            style: AppTextStyles.bodyBold),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
@@ -282,8 +258,8 @@ class _RecoveryInfoScreenState extends ConsumerState<RecoveryInfoScreen> {
         _infoRow('Contact', vehicle.recoveryContact),
         if (vehicle.recoveryNotes.isNotEmpty) ...[
           const SizedBox(height: 12),
-          const SectionHeader(
-              title: 'Notes', icon: Icons.notes_rounded),
+          const SizedBox(height: 4),
+          Text('Notes', style: AppTextStyles.caption),
           const SizedBox(height: 4),
           Container(
             width: double.infinity,
@@ -348,10 +324,7 @@ class _RecoveryInfoScreenState extends ConsumerState<RecoveryInfoScreen> {
 
         // Insurance — always show, tappable to go to insurance details
         const SizedBox(height: 24),
-        const SectionHeader(
-          title: 'Your Insurer',
-          icon: Icons.shield_rounded,
-        ),
+        Text('Your Insurer', style: AppTextStyles.bodyBold),
         const SizedBox(height: 8),
         Card(
           child: InkWell(
@@ -421,9 +394,6 @@ class _RecoveryInfoScreenState extends ConsumerState<RecoveryInfoScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-              title: 'Recovery Details', icon: Icons.local_shipping_rounded),
-          const SizedBox(height: 8),
           TextFormField(
             controller: _providerCtrl,
             decoration:

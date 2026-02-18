@@ -14,7 +14,6 @@ import 'package:my_vehicles/providers/mot_provider.dart';
 import 'package:my_vehicles/providers/service_provider.dart';
 import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
-import 'package:my_vehicles/widgets/section_header.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -265,27 +264,12 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
         }
 
         return AppScaffold(
-          title: '',
-          centerTitle: true,
+          title: _isEditing ? 'Editing Vehicle' : 'Vehicle Info',
+          useOverlayNav: true,
           showBackButton: true,
-          actions: _isEditing
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _cancel,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    onPressed: _save,
-                  ),
-                ]
-              : [
-                  IconButton(
-                    icon:
-                        const Icon(Icons.edit_rounded, color: Colors.white),
-                    onPressed: () => _startEditing(vehicle),
-                  ),
-                ],
+          onBack: _isEditing ? _cancel : null,
+          overlayFabIcon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          overlayFabOnPressed: _isEditing ? _save : () => _startEditing(vehicle),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: _isEditing ? _buildForm() : _buildDisplay(vehicle),
@@ -325,8 +309,6 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
             ),
           ),
 
-        const SectionHeader(
-            title: 'Vehicle Details', icon: Icons.directions_car_rounded),
         _infoRow('Description', vehicle.description),
         _infoRow('Registration', vehicle.registration.toUpperCase()),
         _infoRow('Make', vehicle.make),
@@ -425,9 +407,6 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
             ),
           ),
 
-          const SectionHeader(
-              title: 'Vehicle Details', icon: Icons.directions_car_rounded),
-          const SizedBox(height: 8),
           TextFormField(
             controller: _descriptionCtrl,
             decoration: const InputDecoration(

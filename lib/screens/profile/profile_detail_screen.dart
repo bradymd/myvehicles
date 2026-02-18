@@ -43,18 +43,10 @@ class ProfileDetailScreen extends ConsumerWidget {
 
         return AppScaffold(
           title: profile.name.isNotEmpty ? profile.name : 'Driver Profile',
-          centerTitle: true,
+          useOverlayNav: true,
           showBackButton: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.edit_rounded, color: Colors.white),
-              onPressed: () => context.push('/edit-profile/${profile.id}'),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_rounded, color: Colors.white),
-              onPressed: () => _confirmDelete(context, ref, profile),
-            ),
-          ],
+          overlayFabIcon: Icons.edit_rounded,
+          overlayFabOnPressed: () => context.push('/edit-profile/${profile.id}'),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -99,6 +91,15 @@ class ProfileDetailScreen extends ConsumerWidget {
                     ],
                   ),
 
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => _confirmDelete(context, ref, profile),
+                    icon: const Icon(Icons.delete_outline_rounded,
+                        color: AppColors.danger),
+                    label: const Text('Delete Profile',
+                        style: TextStyle(color: AppColors.danger)),
+                  ),
+                ),
                 const SizedBox(height: 32),
               ],
             ),

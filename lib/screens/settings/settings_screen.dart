@@ -306,9 +306,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final tipJar = ref.watch(tipJarProvider);
 
     return AppScaffold(
-      title: '',
-      centerTitle: true,
-      showBackButton: false,
+      title: 'Settings & Tools',
+      useOverlayNav: true,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
