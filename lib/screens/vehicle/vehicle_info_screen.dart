@@ -258,14 +258,14 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
             vehicles.where((v) => v.id == widget.vehicleId).firstOrNull;
         if (vehicle == null) {
           return AppScaffold(
-            title: 'My Vehicles',
+            title: '',
             showBackButton: true,
             body: const Center(child: Text('Vehicle not found')),
           );
         }
 
         return AppScaffold(
-          title: 'My Vehicles',
+          title: '',
           centerTitle: true,
           showBackButton: true,
           actions: _isEditing

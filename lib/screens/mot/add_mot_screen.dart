@@ -156,7 +156,7 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
     // For new records, just show the form
     if (!isExistingRecord) {
       return AppScaffold(
-        title: 'My Vehicles',
+        title: '',
         centerTitle: true,
         showBackButton: true,
         showMenuButton: false,
@@ -179,14 +179,14 @@ class _AddMOTScreenState extends ConsumerState<AddMOTScreen> {
             records.where((r) => r.id == widget.editRecordId).firstOrNull;
         if (record == null) {
           return AppScaffold(
-            title: 'My Vehicles',
+            title: '',
             showBackButton: true,
             body: const Center(child: Text('Record not found')),
           );
         }
 
         return AppScaffold(
-          title: 'My Vehicles',
+          title: '',
           centerTitle: true,
           showBackButton: true,
           actions: _isEditing

@@ -23,7 +23,7 @@ class MOTHistoryScreen extends ConsumerWidget {
         .firstOrNull;
 
     return AppScaffold(
-      title: 'My Vehicles',
+      title: '',
       centerTitle: true,
       showBackButton: true,
       floatingActionButton: FloatingActionButton(

@@ -184,7 +184,7 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
     // For new entries, just show the form
     if (!isExistingEntry) {
       return AppScaffold(
-        title: 'My Vehicles',
+        title: '',
         centerTitle: true,
         showBackButton: true,
         showMenuButton: false,
@@ -207,14 +207,14 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
             entries.where((e) => e.id == widget.editEntryId).firstOrNull;
         if (entry == null) {
           return AppScaffold(
-            title: 'My Vehicles',
+            title: '',
             showBackButton: true,
             body: const Center(child: Text('Entry not found')),
           );
         }
 
         return AppScaffold(
-          title: 'My Vehicles',
+          title: '',
           centerTitle: true,
           showBackButton: true,
           actions: _isEditing

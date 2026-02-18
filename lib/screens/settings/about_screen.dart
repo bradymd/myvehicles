@@ -17,7 +17,7 @@ class AboutScreen extends ConsumerWidget {
     final tipJar = ref.watch(tipJarProvider);
 
     return AppScaffold(
-      title: 'My Vehicles',
+      title: '',
       centerTitle: true,
       showBackButton: false,
       showMenuButton: true,

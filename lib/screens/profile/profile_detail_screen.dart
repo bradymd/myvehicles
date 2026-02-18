@@ -21,12 +21,12 @@ class ProfileDetailScreen extends ConsumerWidget {
 
     return profilesAsync.when(
       loading: () => const AppScaffold(
-        title: 'Driver Profile',
+        title: '',
         showBackButton: true,
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => AppScaffold(
-        title: 'Driver Profile',
+        title: '',
         showBackButton: true,
         body: Center(child: Text('Error: $e')),
       ),
@@ -35,7 +35,7 @@ class ProfileDetailScreen extends ConsumerWidget {
 
         if (profile == null) {
           return const AppScaffold(
-            title: 'Driver Profile',
+            title: '',
             showBackButton: true,
             body: Center(child: Text('Profile not found')),
           );

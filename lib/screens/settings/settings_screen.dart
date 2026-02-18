@@ -306,7 +306,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final tipJar = ref.watch(tipJarProvider);
 
     return AppScaffold(
-      title: 'Settings & Tools',
+      title: '',
       centerTitle: true,
       showBackButton: false,
       body: ListView(

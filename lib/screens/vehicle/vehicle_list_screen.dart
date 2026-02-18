@@ -14,7 +14,7 @@ class VehicleListScreen extends ConsumerWidget {
     final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return AppScaffold(
-      title: 'My Vehicles',
+      title: '',
       showBackButton: true,
       onBack: () => context.go('/'),
       floatingActionButton: FloatingActionButton(

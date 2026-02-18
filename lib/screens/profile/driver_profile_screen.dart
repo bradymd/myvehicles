@@ -17,7 +17,7 @@ class DriverProfileScreen extends ConsumerWidget {
     final profilesAsync = ref.watch(profilesProvider);
 
     return AppScaffold(
-      title: 'Driver Profiles',
+      title: '',
       centerTitle: true,
       showBackButton: false,
       body: profilesAsync.when(

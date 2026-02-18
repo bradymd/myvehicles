@@ -7,7 +7,7 @@ import 'package:my_vehicles/widgets/app_menu_button.dart';
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
     super.key,
-    required this.title,
+    this.title = '',
     this.subtitle,
     this.titleWidget,
     required this.body,

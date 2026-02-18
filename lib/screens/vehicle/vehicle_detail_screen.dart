@@ -27,14 +27,14 @@ class VehicleDetailScreen extends ConsumerWidget {
         final vehicle = vehicles.where((v) => v.id == vehicleId).firstOrNull;
         if (vehicle == null) {
           return AppScaffold(
-            title: 'My Vehicles',
+            title: '',
             showBackButton: true,
             body: const Center(child: Text('Vehicle not found')),
           );
         }
 
         return AppScaffold(
-          title: 'My Vehicles',
+          title: '',
           centerTitle: true,
           showBackButton: true,
           body: SingleChildScrollView(
