@@ -37,6 +37,8 @@ migrate_working_dir/
 # Platform build outputs
 /android/.gradle/
 /android/local.properties
+/android/key.properties
+/android/upload-keystore.jks
 /android/app/build/
 /ios/Pods/
 /ios/.symlinks/
