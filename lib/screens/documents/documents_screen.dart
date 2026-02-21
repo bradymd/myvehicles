@@ -10,6 +10,7 @@ import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/utils/id_generator.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
+import 'package:my_vehicles/widgets/staggered_list_item.dart';
 import 'package:path/path.dart' as p;
 
 class DocumentsScreen extends ConsumerWidget {
@@ -60,10 +61,13 @@ class DocumentsScreen extends ConsumerWidget {
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final doc = docs[index];
-              return _DocumentTile(
-                doc: doc,
-                onTap: () => DocumentService.openFile(doc.localPath),
-                onDelete: () => _confirmDelete(context, ref, doc),
+              return StaggeredListItem(
+                index: index,
+                child: _DocumentTile(
+                  doc: doc,
+                  onTap: () => DocumentService.openFile(doc.localPath),
+                  onDelete: () => _confirmDelete(context, ref, doc),
+                ),
               );
             },
           );

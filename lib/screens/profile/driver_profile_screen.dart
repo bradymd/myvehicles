@@ -8,6 +8,7 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
+import 'package:my_vehicles/widgets/staggered_list_item.dart';
 
 class DriverProfileScreen extends ConsumerWidget {
   const DriverProfileScreen({super.key});
@@ -38,8 +39,10 @@ class DriverProfileScreen extends ConsumerWidget {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: profiles.length,
-            itemBuilder: (context, index) =>
-                _ProfileCard(profile: profiles[index]),
+            itemBuilder: (context, index) => StaggeredListItem(
+              index: index,
+              child: _ProfileCard(profile: profiles[index]),
+            ),
           );
         },
       ),

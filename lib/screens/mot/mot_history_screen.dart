@@ -8,6 +8,7 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
+import 'package:my_vehicles/widgets/staggered_list_item.dart';
 
 class MOTHistoryScreen extends ConsumerWidget {
   const MOTHistoryScreen({super.key, required this.vehicleId});
@@ -68,7 +69,9 @@ class MOTHistoryScreen extends ConsumerWidget {
               final record = records[index];
               final passed = record.result == 'pass';
 
-              return Card(
+              return StaggeredListItem(
+                index: index,
+                child: Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: InkWell(
                   onTap: () => context.push(
@@ -179,6 +182,7 @@ class MOTHistoryScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                ),
                 ),
               );
             },

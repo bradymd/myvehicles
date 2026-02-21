@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:my_vehicles/providers/vehicle_provider.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
+import 'package:my_vehicles/widgets/staggered_list_item.dart';
 import 'package:my_vehicles/widgets/vehicle_card.dart';
 
 class VehicleListScreen extends ConsumerWidget {
@@ -37,11 +38,15 @@ class VehicleListScreen extends ConsumerWidget {
             itemCount: vehicles.length,
             itemBuilder: (context, index) {
               final v = vehicles[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: VehicleCard(
-                  vehicle: v,
-                  onTap: () => context.push('/vehicle/${v.id}'),
+              return StaggeredListItem(
+                index: index,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: VehicleCard(
+                    vehicle: v,
+                    heroTag: 'vehicle-${v.id}',
+                    onTap: () => context.push('/vehicle/${v.id}'),
+                  ),
                 ),
               );
             },

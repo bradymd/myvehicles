@@ -9,6 +9,7 @@ import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
+import 'package:my_vehicles/widgets/staggered_list_item.dart';
 
 class VehicleDetailScreen extends ConsumerWidget {
   const VehicleDetailScreen({super.key, required this.vehicleId});
@@ -41,69 +42,79 @@ class VehicleDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Photo
-                if (vehicle.photoPath.isNotEmpty &&
-                    File(vehicle.photoPath).existsSync())
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Image.file(
-                      File(vehicle.photoPath),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-
-                // Vehicle Details — tappable card
-                Card(
-                  child: InkWell(
-                    onTap: () => context.push('/vehicle-info/${vehicle.id}'),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
+                // Photo + info card — Hero target for list → detail transition
+                Hero(
+                  tag: 'vehicle-$vehicleId',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (vehicle.photoPath.isNotEmpty &&
+                            File(vehicle.photoPath).existsSync())
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            height: 200,
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 16),
+                            clipBehavior: Clip.antiAlias,
                             decoration: BoxDecoration(
-                              color: _colourFromName(vehicle.colour).withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Icon(Icons.directions_car_rounded,
-                                color: _colourFromName(vehicle.colour), size: 26),
+                            child: Image.file(
+                              File(vehicle.photoPath),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  [
-                                    vehicle.make,
-                                    vehicle.model,
-                                    vehicle.year,
-                                  ].where((s) => s.isNotEmpty).join(' \u2022 '),
-                                  style: AppTextStyles.subheading,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (vehicle.registration.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    vehicle.registration.toUpperCase(),
-                                    style: AppTextStyles.caption,
+                        Card(
+                          child: InkWell(
+                            onTap: () => context.push('/vehicle-info/${vehicle.id}'),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: _colourFromName(vehicle.colour).withValues(alpha: 0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.directions_car_rounded,
+                                        color: _colourFromName(vehicle.colour), size: 26),
                                   ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          [
+                                            vehicle.make,
+                                            vehicle.model,
+                                            vehicle.year,
+                                          ].where((s) => s.isNotEmpty).join(' \u2022 '),
+                                          style: AppTextStyles.subheading,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (vehicle.registration.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            vehicle.registration.toUpperCase(),
+                                            style: AppTextStyles.caption,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_right_rounded,
+                                      color: AppColors.textMuted),
                                 ],
-                              ],
+                              ),
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded,
-                              color: AppColors.textMuted),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -118,66 +129,87 @@ class VehicleDetailScreen extends ConsumerWidget {
                   crossAxisSpacing: 12,
                   childAspectRatio: 0.85,
                   children: [
-                    _IconPanel(
-                      icon: Icons.build_rounded,
-                      label: 'Service',
-                      color: AppColors.primary,
-                      onTap: () => context
-                          .push('/service-history/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 0,
+                      child: _IconPanel(
+                        icon: Icons.build_rounded,
+                        label: 'Service',
+                        color: AppColors.primary,
+                        onTap: () => context
+                            .push('/service-history/${vehicle.id}'),
+                      ),
                     ),
-                    _IconPanel(
-                      icon: Icons.verified_rounded,
-                      label: 'MOT',
-                      subtitle: _motSubtitle(vehicle),
-                      subtitleColor: _motColor(vehicle),
-                      color: const Color(0xFF2E7D32),
-                      onTap: () =>
-                          context.push('/mot-history/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 1,
+                      child: _IconPanel(
+                        icon: Icons.verified_rounded,
+                        label: 'MOT',
+                        subtitle: _motSubtitle(vehicle),
+                        subtitleColor: _motColor(vehicle),
+                        color: const Color(0xFF2E7D32),
+                        onTap: () =>
+                            context.push('/mot-history/${vehicle.id}'),
+                      ),
                     ),
-                    _IconPanel(
-                      icon: Icons.shield_rounded,
-                      label: 'Insurance',
-                      subtitle: _insuranceSubtitle(vehicle),
-                      subtitleColor: _insuranceColor(vehicle),
-                      color: const Color(0xFF1565C0),
-                      onTap: () => context
-                          .push('/insurance-info/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 2,
+                      child: _IconPanel(
+                        icon: Icons.shield_rounded,
+                        label: 'Insurance',
+                        subtitle: _insuranceSubtitle(vehicle),
+                        subtitleColor: _insuranceColor(vehicle),
+                        color: const Color(0xFF1565C0),
+                        onTap: () => context
+                            .push('/insurance-info/${vehicle.id}'),
+                      ),
                     ),
-                    _IconPanel(
-                      icon: Icons.receipt_long_rounded,
-                      label: 'Car Tax',
-                      subtitle: (vehicle.ownership == 'leased' ||
-                              vehicle.ownership == 'pch')
-                          ? 'N/A (Leased)'
-                          : _dateSubtitle(vehicle.taxDueDate),
-                      subtitleColor: (vehicle.ownership == 'leased' ||
-                              vehicle.ownership == 'pch')
-                          ? AppColors.textMuted
-                          : _dateColor(vehicle.taxDueDate),
-                      color: const Color(0xFF00695C),
-                      onTap: () => context
-                          .push('/car-tax-info/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 3,
+                      child: _IconPanel(
+                        icon: Icons.receipt_long_rounded,
+                        label: 'Car Tax',
+                        subtitle: (vehicle.ownership == 'leased' ||
+                                vehicle.ownership == 'pch')
+                            ? 'N/A (Leased)'
+                            : _dateSubtitle(vehicle.taxDueDate),
+                        subtitleColor: (vehicle.ownership == 'leased' ||
+                                vehicle.ownership == 'pch')
+                            ? AppColors.textMuted
+                            : _dateColor(vehicle.taxDueDate),
+                        color: const Color(0xFF00695C),
+                        onTap: () => context
+                            .push('/car-tax-info/${vehicle.id}'),
+                      ),
                     ),
-                    _IconPanel(
-                      icon: Icons.car_repair_rounded,
-                      label: 'Breakdown',
-                      color: const Color(0xFFFF9800),
-                      onTap: () => context
-                          .push('/breakdown-info/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 4,
+                      child: _IconPanel(
+                        icon: Icons.car_repair_rounded,
+                        label: 'Breakdown',
+                        color: const Color(0xFFFF9800),
+                        onTap: () => context
+                            .push('/breakdown-info/${vehicle.id}'),
+                      ),
                     ),
-                    _IconPanel(
-                      icon: Icons.local_shipping_rounded,
-                      label: 'Accident',
-                      color: const Color(0xFFE53935),
-                      onTap: () => context
-                          .push('/recovery-info/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 5,
+                      child: _IconPanel(
+                        icon: Icons.local_shipping_rounded,
+                        label: 'Accident',
+                        color: const Color(0xFFE53935),
+                        onTap: () => context
+                            .push('/recovery-info/${vehicle.id}'),
+                      ),
                     ),
-                    _IconPanel(
-                      icon: Icons.account_balance_rounded,
-                      label: 'Ownership',
-                      color: const Color(0xFF6A1B9A),
-                      onTap: () => context
-                          .push('/ownership-info/${vehicle.id}'),
+                    StaggeredListItem(
+                      index: 6,
+                      child: _IconPanel(
+                        icon: Icons.account_balance_rounded,
+                        label: 'Ownership',
+                        color: const Color(0xFF6A1B9A),
+                        onTap: () => context
+                            .push('/ownership-info/${vehicle.id}'),
+                      ),
                     ),
                   ],
                 ),

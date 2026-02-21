@@ -10,10 +10,12 @@ class VehicleCard extends StatelessWidget {
     super.key,
     required this.vehicle,
     this.onTap,
+    this.heroTag,
   });
 
   final Vehicle vehicle;
   final VoidCallback? onTap;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +23,7 @@ class VehicleCard extends StatelessWidget {
         vehicle.photoPath.isNotEmpty && File(vehicle.photoPath).existsSync();
     final carColor = _colorFromName(vehicle.colour);
 
-    return Card(
+    Widget card = Card(
       clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -135,6 +137,17 @@ class VehicleCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (heroTag != null) {
+      return Hero(
+        tag: heroTag!,
+        child: Material(
+          type: MaterialType.transparency,
+          child: card,
+        ),
+      );
+    }
+    return card;
   }
 
   String _buildDescription() {

@@ -9,6 +9,7 @@ import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:my_vehicles/widgets/empty_state.dart';
+import 'package:my_vehicles/widgets/staggered_list_item.dart';
 
 class ServiceHistoryScreen extends ConsumerWidget {
   const ServiceHistoryScreen({super.key, required this.vehicleId});
@@ -98,42 +99,46 @@ class ServiceHistoryScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               // Entries
-              ...entries.map((entry) {
+              ...entries.asMap().entries.map((e) {
+                final entry = e.value;
                 final type = ServiceType.values
                     .where((t) => t.name == entry.type)
                     .firstOrNull;
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.softPurple,
-                      child: Icon(
-                        _iconForType(entry.type),
-                        color: AppColors.primary,
-                        size: 20,
+                return StaggeredListItem(
+                  index: e.key,
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.softPurple,
+                        child: Icon(
+                          _iconForType(entry.type),
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                       ),
+                      title: Text(
+                        entry.description.isNotEmpty
+                            ? entry.description
+                            : (type?.label ?? 'Service'),
+                        style: AppTextStyles.bodyBold,
+                      ),
+                      subtitle: Text(
+                        '${formatDateUK(entry.date)}${entry.garage.isNotEmpty ? ' \u2022 ${entry.garage}' : ''}',
+                        style: AppTextStyles.caption,
+                      ),
+                      trailing: entry.cost > 0
+                          ? Text(
+                              '\u00A3${entry.cost.toStringAsFixed(2)}',
+                              style: AppTextStyles.bodyBold
+                                  .copyWith(color: AppColors.primary),
+                            )
+                          : null,
+                      onTap: () => context.push(
+                          '/edit-service/$vehicleId/${entry.id}'),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
-                    title: Text(
-                      entry.description.isNotEmpty
-                          ? entry.description
-                          : (type?.label ?? 'Service'),
-                      style: AppTextStyles.bodyBold,
-                    ),
-                    subtitle: Text(
-                      '${formatDateUK(entry.date)}${entry.garage.isNotEmpty ? ' \u2022 ${entry.garage}' : ''}',
-                      style: AppTextStyles.caption,
-                    ),
-                    trailing: entry.cost > 0
-                        ? Text(
-                            '\u00A3${entry.cost.toStringAsFixed(2)}',
-                            style: AppTextStyles.bodyBold
-                                .copyWith(color: AppColors.primary),
-                          )
-                        : null,
-                    onTap: () => context.push(
-                        '/edit-service/$vehicleId/${entry.id}'),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
                   ),
                 );
               }),
