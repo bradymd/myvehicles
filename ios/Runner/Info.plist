@@ -49,6 +49,8 @@
 	<string>MyVehicles uses your location to show your position on the emergency breakdown screen.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>MyVehicles uses your location to show your position on the emergency breakdown screen.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
