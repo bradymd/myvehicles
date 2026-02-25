@@ -62,11 +62,22 @@ class AppScaffold extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
               child: Row(
                 children: [
-                  _overlayButton(
-                    onPressed: () => context.go('/'),
-                    icon: Icons.home_rounded,
-                    tooltip: 'Home',
-                  ),
+                  // Back arrow top-left
+                  if (showBackButton)
+                    _overlayButton(
+                      onPressed: onBack ??
+                          () {
+                            if (GoRouter.of(context).canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('/');
+                            }
+                          },
+                      icon: Icons.arrow_back_rounded,
+                      tooltip: 'Back',
+                    )
+                  else
+                    const SizedBox(width: 42),
                   Expanded(
                     child: title.isNotEmpty
                         ? Text(
@@ -101,18 +112,12 @@ class AppScaffold extends StatelessWidget {
   }
 
   Widget? _buildOverlayFabs(BuildContext context) {
-    final backButton = showBackButton
+    // Home button bottom-left (hidden on home page)
+    final homeButton = !isHome
         ? _overlayButton(
-            onPressed: onBack ??
-                () {
-                  if (GoRouter.of(context).canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/');
-                  }
-                },
-            icon: Icons.arrow_back_rounded,
-            tooltip: 'Back',
+            onPressed: () => context.go('/'),
+            icon: Icons.home_rounded,
+            tooltip: 'Home',
           )
         : null;
 
@@ -124,13 +129,13 @@ class AppScaffold extends StatelessWidget {
           )
         : null;
 
-    if (backButton != null || actionButton != null) {
+    if (homeButton != null || actionButton != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            backButton ?? const SizedBox(width: 42),
+            homeButton ?? const SizedBox(width: 42),
             actionButton ?? const SizedBox(width: 42),
           ],
         ),
@@ -181,10 +186,8 @@ class AppScaffold extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        // Home icon on left
-                        _buildHomeIcon(context),
+                        // Back arrow top-left
                         if (showBackButton && !isHome) ...[
-                          const SizedBox(width: 4),
                           IconButton(
                             icon: const Icon(Icons.arrow_back_rounded,
                                 color: Colors.white),
@@ -263,19 +266,34 @@ class AppScaffold extends StatelessWidget {
           Expanded(child: body),
         ],
       ),
-      floatingActionButton: floatingActionButton,
+      floatingActionButton: _buildClassicFabs(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _buildHomeIcon(BuildContext context) {
-    if (isHome) {
-      return const Icon(Icons.home_rounded, color: Colors.white, size: 28);
+  Widget? _buildClassicFabs(BuildContext context) {
+    // Home button bottom-left (hidden on home page)
+    final homeButton = !isHome
+        ? _overlayButton(
+            onPressed: () => context.go('/'),
+            icon: Icons.home_rounded,
+            tooltip: 'Home',
+          )
+        : null;
+
+    if (homeButton != null || floatingActionButton != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            homeButton ?? const SizedBox(width: 42),
+            floatingActionButton ?? const SizedBox(width: 42),
+          ],
+        ),
+      );
     }
-    return IconButton(
-      icon: const Icon(Icons.home_rounded, color: Colors.white, size: 28),
-      onPressed: () => context.go('/'),
-      tooltip: 'Home',
-    );
+    return null;
   }
 }
 

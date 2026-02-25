@@ -37,6 +37,7 @@ class VehicleDetailScreen extends ConsumerWidget {
         return AppScaffold(
           useOverlayNav: true,
           title: 'Vehicle Details',
+          showBackButton: true,
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -47,6 +48,7 @@ class VehicleDetailScreen extends ConsumerWidget {
                   tag: 'vehicle-$vehicleId',
                   child: Material(
                     type: MaterialType.transparency,
+                    clipBehavior: Clip.hardEdge,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,9 +366,10 @@ class _IconPanel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -385,7 +388,7 @@ class _IconPanel extends StatelessWidget {
                 ),
                 child: Icon(icon, color: color, size: 24),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(label,
                   style: AppTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
