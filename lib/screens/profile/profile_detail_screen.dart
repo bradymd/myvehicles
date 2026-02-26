@@ -160,10 +160,10 @@ class _LicenceCardState extends State<_LicenceCard>
 
   bool get _hasFront =>
       widget.profile.licencePhotoFront.isNotEmpty &&
-      File(widget.profile.licencePhotoFront).existsSync();
+      DocumentService.fileExistsSync(widget.profile.licencePhotoFront);
   bool get _hasBack =>
       widget.profile.licencePhotoBack.isNotEmpty &&
-      File(widget.profile.licencePhotoBack).existsSync();
+      DocumentService.fileExistsSync(widget.profile.licencePhotoBack);
 
   @override
   void initState() {

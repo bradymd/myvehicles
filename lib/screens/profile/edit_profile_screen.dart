@@ -347,7 +347,7 @@ class _LicencePhotoSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasPhoto = path.isNotEmpty && File(path).existsSync();
+    final hasPhoto = path.isNotEmpty && DocumentService.fileExistsSync(path);
 
     return GestureDetector(
       onTap: onTap,

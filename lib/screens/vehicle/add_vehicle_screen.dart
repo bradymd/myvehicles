@@ -232,7 +232,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: _photoPath.isNotEmpty &&
-                          File(_photoPath).existsSync()
+                          DocumentService.fileExistsSync(_photoPath)
                       ? Stack(
                           fit: StackFit.expand,
                           children: [
