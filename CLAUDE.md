@@ -102,6 +102,9 @@ When making a change that affects a pattern used across multiple files (e.g. pat
 3. Verify with a follow-up search that zero instances of the old pattern remain
 4. List every file changed in your summary so the user can verify coverage
 
+### Always Run Analyze Before Committing
+Codemagic runs `flutter analyze` and fails the build on warnings (e.g. unused imports). Always run `flutter analyze` locally before pushing to catch these issues early.
+
 ### File Path Rules (CRITICAL - iOS breaks without this)
 - NEVER use `File(path).existsSync()` directly on database paths — they are relative
 - ALWAYS use `DocumentService.fileExistsSync(path)` to check file existence
