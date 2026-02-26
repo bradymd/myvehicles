@@ -25,6 +25,7 @@
 - 1.0.2+3 - Navigation UI updates
 - 1.0.3+4 - iOS file persistence attributes (failed to fix data loss)
 - 1.0.4+5 - Relative path fix for iOS container relocation
+- 1.0.5+6 - Android NDK 27 upgrade, simplified vehicle details navigation
 
 ## Recent Issues & Fixes
 

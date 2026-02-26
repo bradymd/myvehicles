@@ -24,6 +24,7 @@ class AppScaffold extends StatelessWidget {
     this.useOverlayNav = false,
     this.overlayFabIcon,
     this.overlayFabOnPressed,
+    this.showHomeButton = true,
   });
 
   final String title;
@@ -42,6 +43,7 @@ class AppScaffold extends StatelessWidget {
   final bool useOverlayNav;
   final IconData? overlayFabIcon;
   final VoidCallback? overlayFabOnPressed;
+  final bool showHomeButton;
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +114,8 @@ class AppScaffold extends StatelessWidget {
   }
 
   Widget? _buildOverlayFabs(BuildContext context) {
-    // Home button bottom-left (hidden on home page)
-    final homeButton = !isHome
+    // Home button bottom-left (hidden on home page or if disabled)
+    final homeButton = !isHome && showHomeButton
         ? _overlayButton(
             onPressed: () => context.go('/'),
             icon: Icons.home_rounded,
@@ -272,8 +274,8 @@ class AppScaffold extends StatelessWidget {
   }
 
   Widget? _buildClassicFabs(BuildContext context) {
-    // Home button bottom-left (hidden on home page)
-    final homeButton = !isHome
+    // Home button bottom-left (hidden on home page or if disabled)
+    final homeButton = !isHome && showHomeButton
         ? _overlayButton(
             onPressed: () => context.go('/'),
             icon: Icons.home_rounded,

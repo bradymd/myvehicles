@@ -38,6 +38,7 @@ class VehicleDetailScreen extends ConsumerWidget {
           useOverlayNav: true,
           title: 'Vehicle Details',
           showBackButton: true,
+          showHomeButton: false,
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
