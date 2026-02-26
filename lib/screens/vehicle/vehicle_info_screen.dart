@@ -299,7 +299,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
       children: [
         // Photo
         if (vehicle.photoPath.isNotEmpty &&
-            File(vehicle.photoPath).existsSync())
+            DocumentService.fileExistsSync(vehicle.photoPath))
           Container(
             height: 200,
             width: double.infinity,
@@ -309,7 +309,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Image.file(
-              File(vehicle.photoPath),
+              File(DocumentService.resolvePathSync(vehicle.photoPath)),
               fit: BoxFit.cover,
             ),
           ),
@@ -362,7 +362,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                 ),
               ),
               clipBehavior: Clip.antiAlias,
-              child: _photoPath.isNotEmpty && File(_photoPath).existsSync()
+              child: _photoPath.isNotEmpty && DocumentService.fileExistsSync(_photoPath)
                   ? Stack(
                       fit: StackFit.expand,
                       children: [
@@ -715,7 +715,7 @@ class _AllDocumentsReadOnlyState extends ConsumerState<_AllDocumentsReadOnly> {
           ...List.generate(_docs.length, (i) {
             final doc = _docs[i];
             final fileExists =
-                doc.localPath.isNotEmpty && File(doc.localPath).existsSync();
+                doc.localPath.isNotEmpty && DocumentService.fileExistsSync(doc.localPath);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 8),

@@ -26,6 +26,7 @@
 - 1.0.3+4 - iOS file persistence attributes (failed to fix data loss)
 - 1.0.4+5 - Relative path fix for iOS container relocation
 - 1.0.5+6 - Android NDK 27 upgrade, simplified vehicle details navigation
+- 1.0.6+7 - Fix documents/photos not displaying due to unresolved relative paths
 
 ## Recent Issues & Fixes
 
@@ -91,6 +92,21 @@ Tables:
 - Location: `my_vehicles_autobackup.zip` in app directory
 - Contents: Database + all document/photo folders
 - Restore: Accessible from Settings, automatically normalizes paths to relative
+
+## Development Rules
+
+### Cross-Cutting Changes Require Full Sweep
+When making a change that affects a pattern used across multiple files (e.g. path resolution, theme changes, API changes), you MUST:
+1. Use `grep`/search to find EVERY occurrence of the old pattern across the entire codebase
+2. Fix ALL occurrences, not just the ones you're currently looking at
+3. Verify with a follow-up search that zero instances of the old pattern remain
+4. List every file changed in your summary so the user can verify coverage
+
+### File Path Rules (CRITICAL - iOS breaks without this)
+- NEVER use `File(path).existsSync()` directly on database paths — they are relative
+- ALWAYS use `DocumentService.fileExistsSync(path)` to check file existence
+- ALWAYS use `DocumentService.resolvePathSync(path)` before passing to `File()`, `Image.file()`, etc.
+- If you see bare `File(somePath)` on a database-sourced path anywhere in the codebase, it is a bug — fix it
 
 ## Git Workflow
 - Main branch: `main`

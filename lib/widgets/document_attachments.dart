@@ -434,7 +434,7 @@ class _DocumentAttachmentsState extends ConsumerState<DocumentAttachments> {
           ...List.generate(_docs.length, (i) {
             final doc = _docs[i];
             final fileExists =
-                doc.localPath.isNotEmpty && File(doc.localPath).existsSync();
+                doc.localPath.isNotEmpty && DocumentService.fileExistsSync(doc.localPath);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 8),

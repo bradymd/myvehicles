@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_vehicles/models/vehicle.dart';
 import 'package:my_vehicles/providers/vehicle_provider.dart';
+import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
@@ -55,7 +56,7 @@ class VehicleDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (vehicle.photoPath.isNotEmpty &&
-                            File(vehicle.photoPath).existsSync())
+                            DocumentService.fileExistsSync(vehicle.photoPath))
                           Container(
                             height: 200,
                             width: double.infinity,
@@ -65,7 +66,7 @@ class VehicleDetailScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Image.file(
-                              File(vehicle.photoPath),
+                              File(DocumentService.resolvePathSync(vehicle.photoPath)),
                               fit: BoxFit.cover,
                             ),
                           ),

@@ -32,6 +32,7 @@ class VehicleCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Colour-graded accent line at top
             Container(
