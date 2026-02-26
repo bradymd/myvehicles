@@ -7,7 +7,6 @@ import 'package:my_vehicles/services/file_attributes_service.dart';
 
 class DocumentService {
   static const _docsFolder = 'my_vehicles_docs';
-  static const _photosFolder = 'vehicle_photos';
 
   static String? _cachedAppDir;
 
