@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:my_vehicles/models/vehicle.dart';
+import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 
@@ -19,8 +20,8 @@ class VehicleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasPhoto =
-        vehicle.photoPath.isNotEmpty && File(vehicle.photoPath).existsSync();
+    final hasPhoto = vehicle.photoPath.isNotEmpty &&
+        DocumentService.fileExistsSync(vehicle.photoPath);
     final carColor = _colorFromName(vehicle.colour);
 
     Widget card = Card(
@@ -56,7 +57,7 @@ class VehicleCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.file(
-                      File(vehicle.photoPath),
+                      File(DocumentService.resolvePathSync(vehicle.photoPath)),
                       fit: BoxFit.cover,
                     ),
                     // Soft gradient at bottom for readability

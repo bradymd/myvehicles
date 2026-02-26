@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_vehicles/app.dart';
 import 'package:my_vehicles/services/backup_service.dart';
+import 'package:my_vehicles/services/document_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Cache app directory path before UI renders for synchronous path resolution
+  await DocumentService.init();
 
   runApp(
     const ProviderScope(

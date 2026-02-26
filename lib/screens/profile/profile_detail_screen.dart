@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_vehicles/models/driver_profile.dart';
 import 'package:my_vehicles/providers/profile_provider.dart';
+import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
@@ -336,7 +337,10 @@ class _LicenceCardState extends State<_LicenceCard>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.file(File(path), fit: BoxFit.cover),
+            Image.file(
+              File(DocumentService.resolvePathSync(path)),
+              fit: BoxFit.cover,
+            ),
             // Side label (Front / Back)
             Positioned(
               top: 8,

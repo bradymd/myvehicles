@@ -366,7 +366,10 @@ class _LicencePhotoSlot extends StatelessWidget {
             ? Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.file(File(path), fit: BoxFit.cover),
+                  Image.file(
+                    File(DocumentService.resolvePathSync(path)),
+                    fit: BoxFit.cover,
+                  ),
                   Positioned(
                     bottom: 0,
                     left: 0,

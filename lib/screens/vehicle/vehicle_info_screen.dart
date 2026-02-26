@@ -225,10 +225,12 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
     }
     final ext = p.extension(picked.path);
     final filename = 'vehicle_${widget.vehicleId}$ext';
-    final destPath = p.join(photosDir.path, filename);
-    await File(picked.path).copy(destPath);
+    final absolutePath = p.join(photosDir.path, filename);
+    await File(picked.path).copy(absolutePath);
 
-    setState(() => _photoPath = destPath);
+    // Store relative path for portability across app updates
+    final relativePath = p.join('vehicle_photos', filename);
+    setState(() => _photoPath = relativePath);
   }
 
   Widget _infoRow(String label, String value) {
@@ -364,7 +366,10 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                   ? Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.file(File(_photoPath), fit: BoxFit.cover),
+                        Image.file(
+                          File(DocumentService.resolvePathSync(_photoPath)),
+                          fit: BoxFit.cover,
+                        ),
                         Positioned(
                           bottom: 8,
                           right: 8,

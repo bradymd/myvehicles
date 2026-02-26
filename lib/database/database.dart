@@ -167,7 +167,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -220,8 +220,76 @@ class AppDatabase extends _$AppDatabase {
             await migrator.addColumn(driverProfiles, driverProfiles.licencePhotoFront);
             await migrator.addColumn(driverProfiles, driverProfiles.licencePhotoBack);
           }
+          if (from < 12) {
+            // Convert absolute document paths to relative (my_vehicles_docs/..., vehicle_photos/...)
+            // This fixes iOS app container relocation issues during TestFlight updates
+            await _convertPathsToRelative(
+              'document_refs',
+              'local_path',
+              ['my_vehicles_docs'],
+            );
+            await _convertPathsToRelative(
+              'vehicles',
+              'photo_path',
+              ['vehicle_photos'],
+            );
+            await _convertPathsToRelative(
+              'driver_profiles',
+              'photo_path',
+              ['vehicle_photos'],
+            );
+            await _convertPathsToRelative(
+              'driver_profiles',
+              'licence_photo_front',
+              ['my_vehicles_docs'],
+            );
+            await _convertPathsToRelative(
+              'driver_profiles',
+              'licence_photo_back',
+              ['my_vehicles_docs'],
+            );
+          }
         },
       );
+
+  /// Helper to convert absolute paths to relative paths during migration.
+  Future<void> _convertPathsToRelative(
+    String table,
+    String column,
+    List<String> knownFolders,
+  ) async {
+    final rows = await customSelect(
+      "SELECT id, $column FROM $table WHERE $column != ''",
+    ).get();
+
+    for (final row in rows) {
+      final id = row.read<String>('id');
+      final oldPath = row.read<String>(column);
+
+      // Already relative — skip
+      if (!oldPath.contains('/')) continue;
+      if (!oldPath.startsWith('/')) continue;
+
+      // Find which known folder this path belongs to
+      String? relativePath;
+      for (final folder in knownFolders) {
+        final idx = oldPath.indexOf('$folder/');
+        if (idx >= 0) {
+          // Extract everything from the folder name onwards
+          relativePath = oldPath.substring(idx);
+          break;
+        }
+      }
+
+      // If we found a relative path and it's different from the old one, update it
+      if (relativePath != null && relativePath != oldPath) {
+        await customStatement(
+          'UPDATE $table SET $column = ? WHERE id = ?',
+          [relativePath, id],
+        );
+      }
+    }
+  }
 
   // --- Vehicle operations ---
 

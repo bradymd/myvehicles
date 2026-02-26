@@ -8,6 +8,7 @@ import 'package:my_vehicles/constants/enums.dart';
 import 'package:my_vehicles/models/vehicle.dart';
 import 'package:my_vehicles/providers/vehicle_provider.dart';
 import 'package:my_vehicles/services/file_attributes_service.dart';
+import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/id_generator.dart';
@@ -161,10 +162,12 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     final ext = p.extension(picked.path);
     final filename =
         'vehicle_${widget.editVehicleId ?? generateId()}$ext';
-    final destPath = p.join(photosDir.path, filename);
-    await File(picked.path).copy(destPath);
+    final absolutePath = p.join(photosDir.path, filename);
+    await File(picked.path).copy(absolutePath);
 
-    setState(() => _photoPath = destPath);
+    // Store relative path for portability across app updates
+    final relativePath = p.join('vehicle_photos', filename);
+    setState(() => _photoPath = relativePath);
   }
 
   Future<void> _save() async {
@@ -233,7 +236,10 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                       ? Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.file(File(_photoPath), fit: BoxFit.cover),
+                            Image.file(
+                              File(DocumentService.resolvePathSync(_photoPath)),
+                              fit: BoxFit.cover,
+                            ),
                             Positioned(
                               bottom: 8,
                               right: 8,

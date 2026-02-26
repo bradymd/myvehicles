@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:my_vehicles/database/database.dart';
+import 'package:my_vehicles/services/document_service.dart';
 
 class IntegrityIssue {
   final String recordType;
@@ -113,14 +114,16 @@ class IntegrityService {
     required String field,
     required String path,
   }) {
-    final file = File(path);
+    // Resolve relative paths to absolute paths
+    final resolvedPath = DocumentService.resolvePathSync(path);
+    final file = File(resolvedPath);
     if (!file.existsSync()) {
       return IntegrityIssue(
         recordType: recordType,
         recordLabel: recordLabel,
         field: field,
         problem: 'File missing',
-        path: path,
+        path: resolvedPath,
       );
     }
     if (file.lengthSync() == 0) {
@@ -129,7 +132,7 @@ class IntegrityService {
         recordLabel: recordLabel,
         field: field,
         problem: 'File empty',
-        path: path,
+        path: resolvedPath,
       );
     }
     return null;

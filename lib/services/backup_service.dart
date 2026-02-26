@@ -107,36 +107,35 @@ class BackupService {
     return true;
   }
 
-  /// After restore, rewrite absolute file paths in the DB to match
-  /// this device's app documents directory.
+  /// After restore, normalize absolute file paths to relative paths
+  /// (e.g. "my_vehicles_docs/file.pdf") so they work across devices
+  /// and app container relocations.
   static Future<void> _rewriteDocumentPaths(String appDirPath) async {
     final dbPath = p.join(appDirPath, _dbFilename);
 
     final db = sql.sqlite3.open(dbPath);
     try {
-      // Rewrite document_refs.local_path
-      _rewriteColumn(db, 'document_refs', 'local_path', appDirPath);
+      // Normalize document_refs.local_path
+      _normalizeColumn(db, 'document_refs', 'local_path');
 
-      // Rewrite driver_profiles photo paths
-      _rewriteColumn(db, 'driver_profiles', 'photo_path', appDirPath);
-      _rewriteColumn(db, 'driver_profiles', 'licence_photo_front', appDirPath);
-      _rewriteColumn(db, 'driver_profiles', 'licence_photo_back', appDirPath);
+      // Normalize driver_profiles photo paths
+      _normalizeColumn(db, 'driver_profiles', 'photo_path');
+      _normalizeColumn(db, 'driver_profiles', 'licence_photo_front');
+      _normalizeColumn(db, 'driver_profiles', 'licence_photo_back');
 
-      // Rewrite vehicles.photo_path
-      _rewriteColumn(db, 'vehicles', 'photo_path', appDirPath);
+      // Normalize vehicles.photo_path
+      _normalizeColumn(db, 'vehicles', 'photo_path');
     } finally {
       db.dispose();
     }
   }
 
-  /// Rewrites paths by preserving the folder+filename portion
-  /// (e.g. "vehicle_photos/img.jpg" or "my_vehicles_docs/doc.pdf")
-  /// and replacing only the app directory prefix.
-  static void _rewriteColumn(
+  /// Converts absolute paths to relative paths.
+  /// If already relative, leaves them as-is.
+  static void _normalizeColumn(
     sql.Database db,
     String table,
     String column,
-    String appDirPath,
   ) {
     final knownFolders = [_docsFolder, _photosFolder];
     final rows = db.select(
@@ -146,25 +145,28 @@ class BackupService {
       final id = row['id'] as String;
       final oldPath = row[column] as String;
 
-      // Find which known folder this path belongs to
-      String? newPath;
+      // Already relative — skip
+      if (!oldPath.contains('/')) continue;
+      if (!oldPath.startsWith('/')) continue;
+
+      // Find which known folder this path belongs to and extract relative portion
+      String? relativePath;
       for (final folder in knownFolders) {
         final folderIndex = oldPath.indexOf('$folder/');
         if (folderIndex >= 0) {
-          // Preserve everything from the folder name onwards
-          final relativePart = oldPath.substring(folderIndex);
-          newPath = p.join(appDirPath, relativePart);
+          // Extract everything from the folder name onwards (e.g. "vehicle_photos/car.jpg")
+          relativePath = oldPath.substring(folderIndex);
           break;
         }
       }
 
-      // Fallback: just use basename in the docs folder
-      newPath ??= p.join(appDirPath, _docsFolder, p.basename(oldPath));
-
-      db.execute(
-        'UPDATE $table SET $column = ? WHERE id = ?',
-        [newPath, id],
-      );
+      // If we found a relative path, update it
+      if (relativePath != null && relativePath != oldPath) {
+        db.execute(
+          'UPDATE $table SET $column = ? WHERE id = ?',
+          [relativePath, id],
+        );
+      }
     }
   }
 
