@@ -3,12 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:my_vehicles/services/file_attributes_service.dart';
 
 class DocumentService {
   static Future<String> get _docsDir async {
     final dir = await getApplicationDocumentsDirectory();
     final docsPath = p.join(dir.path, 'my_vehicles_docs');
     await Directory(docsPath).create(recursive: true);
+
+    // Mark directory for iOS backup to ensure it persists through app updates
+    await FileAttributesService.markDirectoryForBackup(docsPath);
+
     return docsPath;
   }
 

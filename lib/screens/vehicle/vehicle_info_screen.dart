@@ -13,6 +13,7 @@ import 'package:my_vehicles/providers/document_provider.dart';
 import 'package:my_vehicles/providers/mot_provider.dart';
 import 'package:my_vehicles/providers/service_provider.dart';
 import 'package:my_vehicles/services/document_service.dart';
+import 'package:my_vehicles/services/file_attributes_service.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -219,6 +220,8 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
     final photosDir = Directory(p.join(appDir.path, 'vehicle_photos'));
     if (!photosDir.existsSync()) {
       photosDir.createSync(recursive: true);
+      // Mark directory for iOS backup to ensure it persists through app updates
+      await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
     final ext = p.extension(picked.path);
     final filename = 'vehicle_${widget.vehicleId}$ext';

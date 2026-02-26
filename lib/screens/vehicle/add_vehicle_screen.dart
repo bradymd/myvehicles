@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:my_vehicles/constants/enums.dart';
 import 'package:my_vehicles/models/vehicle.dart';
 import 'package:my_vehicles/providers/vehicle_provider.dart';
+import 'package:my_vehicles/services/file_attributes_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/id_generator.dart';
@@ -154,6 +155,8 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     final photosDir = Directory(p.join(appDir.path, 'vehicle_photos'));
     if (!photosDir.existsSync()) {
       photosDir.createSync(recursive: true);
+      // Mark directory for iOS backup to ensure it persists through app updates
+      await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
     final ext = p.extension(picked.path);
     final filename =

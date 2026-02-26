@@ -35,16 +35,75 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isRestoring = false;
   bool _isChecking = false;
   AutoBackupInfo? _autoBackupInfo;
+  Map<String, dynamic>? _fileSystemStats;
 
   @override
   void initState() {
     super.initState();
     _loadAutoBackupInfo();
+    _loadFileSystemStats();
   }
 
   Future<void> _loadAutoBackupInfo() async {
     final info = await BackupService.getAutoBackupInfo();
     if (mounted) setState(() => _autoBackupInfo = info);
+  }
+
+  Future<void> _loadFileSystemStats() async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+
+      // Count documents
+      final docsDir = Directory(p.join(appDir.path, 'my_vehicles_docs'));
+      int docCount = 0;
+      int docSize = 0;
+      if (await docsDir.exists()) {
+        await for (final entity in docsDir.list(recursive: true)) {
+          if (entity is File) {
+            docCount++;
+            docSize += await entity.length();
+          }
+        }
+      }
+
+      // Count photos
+      final photosDir = Directory(p.join(appDir.path, 'vehicle_photos'));
+      int photoCount = 0;
+      int photoSize = 0;
+      if (await photosDir.exists()) {
+        await for (final entity in photosDir.list(recursive: true)) {
+          if (entity is File) {
+            photoCount++;
+            photoSize += await entity.length();
+          }
+        }
+      }
+
+      // Get database size
+      final dbFile = File(p.join(appDir.path, 'my_vehicles.sqlite'));
+      int dbSize = 0;
+      DateTime? dbModified;
+      if (await dbFile.exists()) {
+        final stat = await dbFile.stat();
+        dbSize = stat.size;
+        dbModified = stat.modified;
+      }
+
+      if (mounted) {
+        setState(() {
+          _fileSystemStats = {
+            'docCount': docCount,
+            'docSize': docSize,
+            'photoCount': photoCount,
+            'photoSize': photoSize,
+            'dbSize': dbSize,
+            'dbModified': dbModified,
+          };
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to load file system stats: $e');
+    }
   }
 
   // --- Backup ---
@@ -311,6 +370,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   // --- Helpers ---
 
+  Widget _buildStatRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: AppTextStyles.caption),
+        Text(value, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
   String _formatDate(DateTime dt) =>
       DateFormat('d MMM yyyy, HH:mm').format(dt);
 
@@ -456,6 +525,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   borderRadius: BorderRadius.circular(16)),
             ),
           ),
+
+          // File system status
+          if (_fileSystemStats != null)
+            Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.folder_rounded,
+                            color: AppColors.primary, size: 20),
+                        const SizedBox(width: 8),
+                        Text('File System Status', style: AppTextStyles.bodyBold),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildStatRow('Documents',
+                      '${_fileSystemStats!['docCount']} files (${_formatSize(_fileSystemStats!['docSize'])})'),
+                    const SizedBox(height: 6),
+                    _buildStatRow('Photos',
+                      '${_fileSystemStats!['photoCount']} files (${_formatSize(_fileSystemStats!['photoSize'])})'),
+                    const SizedBox(height: 6),
+                    _buildStatRow('Database',
+                      '${_formatSize(_fileSystemStats!['dbSize'])} ${_fileSystemStats!['dbModified'] != null ? '· ${_formatDate(_fileSystemStats!['dbModified'])}' : ''}'),
+                  ],
+                ),
+              ),
+            ),
+
+          const SizedBox(height: 24),
 
           // Support link
           Card(
