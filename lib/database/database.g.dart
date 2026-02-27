@@ -246,7 +246,7 @@ class $VehiclesTable extends Vehicles
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('owned'),
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _financeCompanyMeta = const VerificationMeta(
     'financeCompany',
@@ -617,6 +617,45 @@ class $VehiclesTable extends Vehicles
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _dvlaVerifiedMeta = const VerificationMeta(
+    'dvlaVerified',
+  );
+  @override
+  late final GeneratedColumn<bool> dvlaVerified = GeneratedColumn<bool>(
+    'dvla_verified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dvla_verified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _taxStatusMeta = const VerificationMeta(
+    'taxStatus',
+  );
+  @override
+  late final GeneratedColumn<String> taxStatus = GeneratedColumn<String>(
+    'tax_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _motStatusMeta = const VerificationMeta(
+    'motStatus',
+  );
+  @override
+  late final GeneratedColumn<String> motStatus = GeneratedColumn<String>(
+    'mot_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _photoPathMeta = const VerificationMeta(
     'photoPath',
   );
@@ -683,6 +722,9 @@ class $VehiclesTable extends Vehicles
     taxDueDate,
     currentMileage,
     notes,
+    dvlaVerified,
+    taxStatus,
+    motStatus,
     photoPath,
   ];
   @override
@@ -1113,6 +1155,27 @@ class $VehiclesTable extends Vehicles
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('dvla_verified')) {
+      context.handle(
+        _dvlaVerifiedMeta,
+        dvlaVerified.isAcceptableOrUnknown(
+          data['dvla_verified']!,
+          _dvlaVerifiedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tax_status')) {
+      context.handle(
+        _taxStatusMeta,
+        taxStatus.isAcceptableOrUnknown(data['tax_status']!, _taxStatusMeta),
+      );
+    }
+    if (data.containsKey('mot_status')) {
+      context.handle(
+        _motStatusMeta,
+        motStatus.isAcceptableOrUnknown(data['mot_status']!, _motStatusMeta),
+      );
+    }
     if (data.containsKey('photo_path')) {
       context.handle(
         _photoPathMeta,
@@ -1336,6 +1399,18 @@ class $VehiclesTable extends Vehicles
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       )!,
+      dvlaVerified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dvla_verified'],
+      )!,
+      taxStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tax_status'],
+      )!,
+      motStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mot_status'],
+      )!,
       photoPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}photo_path'],
@@ -1402,6 +1477,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
   final String taxDueDate;
   final int currentMileage;
   final String notes;
+  final bool dvlaVerified;
+  final String taxStatus;
+  final String motStatus;
   final String photoPath;
   const VehicleRow({
     required this.id,
@@ -1456,6 +1534,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     required this.taxDueDate,
     required this.currentMileage,
     required this.notes,
+    required this.dvlaVerified,
+    required this.taxStatus,
+    required this.motStatus,
     required this.photoPath,
   });
   @override
@@ -1515,6 +1596,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     map['tax_due_date'] = Variable<String>(taxDueDate);
     map['current_mileage'] = Variable<int>(currentMileage);
     map['notes'] = Variable<String>(notes);
+    map['dvla_verified'] = Variable<bool>(dvlaVerified);
+    map['tax_status'] = Variable<String>(taxStatus);
+    map['mot_status'] = Variable<String>(motStatus);
     map['photo_path'] = Variable<String>(photoPath);
     return map;
   }
@@ -1573,6 +1657,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       taxDueDate: Value(taxDueDate),
       currentMileage: Value(currentMileage),
       notes: Value(notes),
+      dvlaVerified: Value(dvlaVerified),
+      taxStatus: Value(taxStatus),
+      motStatus: Value(motStatus),
       photoPath: Value(photoPath),
     );
   }
@@ -1647,6 +1734,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       taxDueDate: serializer.fromJson<String>(json['taxDueDate']),
       currentMileage: serializer.fromJson<int>(json['currentMileage']),
       notes: serializer.fromJson<String>(json['notes']),
+      dvlaVerified: serializer.fromJson<bool>(json['dvlaVerified']),
+      taxStatus: serializer.fromJson<String>(json['taxStatus']),
+      motStatus: serializer.fromJson<String>(json['motStatus']),
       photoPath: serializer.fromJson<String>(json['photoPath']),
     );
   }
@@ -1708,6 +1798,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
       'taxDueDate': serializer.toJson<String>(taxDueDate),
       'currentMileage': serializer.toJson<int>(currentMileage),
       'notes': serializer.toJson<String>(notes),
+      'dvlaVerified': serializer.toJson<bool>(dvlaVerified),
+      'taxStatus': serializer.toJson<String>(taxStatus),
+      'motStatus': serializer.toJson<String>(motStatus),
       'photoPath': serializer.toJson<String>(photoPath),
     };
   }
@@ -1765,6 +1858,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     String? taxDueDate,
     int? currentMileage,
     String? notes,
+    bool? dvlaVerified,
+    String? taxStatus,
+    String? motStatus,
     String? photoPath,
   }) => VehicleRow(
     id: id ?? this.id,
@@ -1821,6 +1917,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     taxDueDate: taxDueDate ?? this.taxDueDate,
     currentMileage: currentMileage ?? this.currentMileage,
     notes: notes ?? this.notes,
+    dvlaVerified: dvlaVerified ?? this.dvlaVerified,
+    taxStatus: taxStatus ?? this.taxStatus,
+    motStatus: motStatus ?? this.motStatus,
     photoPath: photoPath ?? this.photoPath,
   );
   VehicleRow copyWithCompanion(VehiclesCompanion data) {
@@ -1947,6 +2046,11 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
           ? data.currentMileage.value
           : this.currentMileage,
       notes: data.notes.present ? data.notes.value : this.notes,
+      dvlaVerified: data.dvlaVerified.present
+          ? data.dvlaVerified.value
+          : this.dvlaVerified,
+      taxStatus: data.taxStatus.present ? data.taxStatus.value : this.taxStatus,
+      motStatus: data.motStatus.present ? data.motStatus.value : this.motStatus,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
     );
   }
@@ -2006,6 +2110,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
           ..write('taxDueDate: $taxDueDate, ')
           ..write('currentMileage: $currentMileage, ')
           ..write('notes: $notes, ')
+          ..write('dvlaVerified: $dvlaVerified, ')
+          ..write('taxStatus: $taxStatus, ')
+          ..write('motStatus: $motStatus, ')
           ..write('photoPath: $photoPath')
           ..write(')'))
         .toString();
@@ -2065,6 +2172,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
     taxDueDate,
     currentMileage,
     notes,
+    dvlaVerified,
+    taxStatus,
+    motStatus,
     photoPath,
   ]);
   @override
@@ -2123,6 +2233,9 @@ class VehicleRow extends DataClass implements Insertable<VehicleRow> {
           other.taxDueDate == this.taxDueDate &&
           other.currentMileage == this.currentMileage &&
           other.notes == this.notes &&
+          other.dvlaVerified == this.dvlaVerified &&
+          other.taxStatus == this.taxStatus &&
+          other.motStatus == this.motStatus &&
           other.photoPath == this.photoPath);
 }
 
@@ -2179,6 +2292,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
   final Value<String> taxDueDate;
   final Value<int> currentMileage;
   final Value<String> notes;
+  final Value<bool> dvlaVerified;
+  final Value<String> taxStatus;
+  final Value<String> motStatus;
   final Value<String> photoPath;
   final Value<int> rowid;
   const VehiclesCompanion({
@@ -2234,6 +2350,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
     this.taxDueDate = const Value.absent(),
     this.currentMileage = const Value.absent(),
     this.notes = const Value.absent(),
+    this.dvlaVerified = const Value.absent(),
+    this.taxStatus = const Value.absent(),
+    this.motStatus = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -2290,6 +2409,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
     this.taxDueDate = const Value.absent(),
     this.currentMileage = const Value.absent(),
     this.notes = const Value.absent(),
+    this.dvlaVerified = const Value.absent(),
+    this.taxStatus = const Value.absent(),
+    this.motStatus = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id);
@@ -2346,6 +2468,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
     Expression<String>? taxDueDate,
     Expression<int>? currentMileage,
     Expression<String>? notes,
+    Expression<bool>? dvlaVerified,
+    Expression<String>? taxStatus,
+    Expression<String>? motStatus,
     Expression<String>? photoPath,
     Expression<int>? rowid,
   }) {
@@ -2408,6 +2533,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
       if (taxDueDate != null) 'tax_due_date': taxDueDate,
       if (currentMileage != null) 'current_mileage': currentMileage,
       if (notes != null) 'notes': notes,
+      if (dvlaVerified != null) 'dvla_verified': dvlaVerified,
+      if (taxStatus != null) 'tax_status': taxStatus,
+      if (motStatus != null) 'mot_status': motStatus,
       if (photoPath != null) 'photo_path': photoPath,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2466,6 +2594,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
     Value<String>? taxDueDate,
     Value<int>? currentMileage,
     Value<String>? notes,
+    Value<bool>? dvlaVerified,
+    Value<String>? taxStatus,
+    Value<String>? motStatus,
     Value<String>? photoPath,
     Value<int>? rowid,
   }) {
@@ -2525,6 +2656,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
       taxDueDate: taxDueDate ?? this.taxDueDate,
       currentMileage: currentMileage ?? this.currentMileage,
       notes: notes ?? this.notes,
+      dvlaVerified: dvlaVerified ?? this.dvlaVerified,
+      taxStatus: taxStatus ?? this.taxStatus,
+      motStatus: motStatus ?? this.motStatus,
       photoPath: photoPath ?? this.photoPath,
       rowid: rowid ?? this.rowid,
     );
@@ -2701,6 +2835,15 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (dvlaVerified.present) {
+      map['dvla_verified'] = Variable<bool>(dvlaVerified.value);
+    }
+    if (taxStatus.present) {
+      map['tax_status'] = Variable<String>(taxStatus.value);
+    }
+    if (motStatus.present) {
+      map['mot_status'] = Variable<String>(motStatus.value);
+    }
     if (photoPath.present) {
       map['photo_path'] = Variable<String>(photoPath.value);
     }
@@ -2765,6 +2908,9 @@ class VehiclesCompanion extends UpdateCompanion<VehicleRow> {
           ..write('taxDueDate: $taxDueDate, ')
           ..write('currentMileage: $currentMileage, ')
           ..write('notes: $notes, ')
+          ..write('dvlaVerified: $dvlaVerified, ')
+          ..write('taxStatus: $taxStatus, ')
+          ..write('motStatus: $motStatus, ')
           ..write('photoPath: $photoPath, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -5393,6 +5539,9 @@ typedef $$VehiclesTableCreateCompanionBuilder =
       Value<String> taxDueDate,
       Value<int> currentMileage,
       Value<String> notes,
+      Value<bool> dvlaVerified,
+      Value<String> taxStatus,
+      Value<String> motStatus,
       Value<String> photoPath,
       Value<int> rowid,
     });
@@ -5450,6 +5599,9 @@ typedef $$VehiclesTableUpdateCompanionBuilder =
       Value<String> taxDueDate,
       Value<int> currentMileage,
       Value<String> notes,
+      Value<bool> dvlaVerified,
+      Value<String> taxStatus,
+      Value<String> motStatus,
       Value<String> photoPath,
       Value<int> rowid,
     });
@@ -5764,6 +5916,21 @@ class $$VehiclesTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dvlaVerified => $composableBuilder(
+    column: $table.dvlaVerified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taxStatus => $composableBuilder(
+    column: $table.taxStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get motStatus => $composableBuilder(
+    column: $table.motStatus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6092,6 +6259,21 @@ class $$VehiclesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get dvlaVerified => $composableBuilder(
+    column: $table.dvlaVerified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taxStatus => $composableBuilder(
+    column: $table.taxStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get motStatus => $composableBuilder(
+    column: $table.motStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get photoPath => $composableBuilder(
     column: $table.photoPath,
     builder: (column) => ColumnOrderings(column),
@@ -6333,6 +6515,17 @@ class $$VehiclesTableAnnotationComposer
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
+  GeneratedColumn<bool> get dvlaVerified => $composableBuilder(
+    column: $table.dvlaVerified,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get taxStatus =>
+      $composableBuilder(column: $table.taxStatus, builder: (column) => column);
+
+  GeneratedColumn<String> get motStatus =>
+      $composableBuilder(column: $table.motStatus, builder: (column) => column);
+
   GeneratedColumn<String> get photoPath =>
       $composableBuilder(column: $table.photoPath, builder: (column) => column);
 
@@ -6467,6 +6660,9 @@ class $$VehiclesTableTableManager
                 Value<String> taxDueDate = const Value.absent(),
                 Value<int> currentMileage = const Value.absent(),
                 Value<String> notes = const Value.absent(),
+                Value<bool> dvlaVerified = const Value.absent(),
+                Value<String> taxStatus = const Value.absent(),
+                Value<String> motStatus = const Value.absent(),
                 Value<String> photoPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VehiclesCompanion(
@@ -6522,6 +6718,9 @@ class $$VehiclesTableTableManager
                 taxDueDate: taxDueDate,
                 currentMileage: currentMileage,
                 notes: notes,
+                dvlaVerified: dvlaVerified,
+                taxStatus: taxStatus,
+                motStatus: motStatus,
                 photoPath: photoPath,
                 rowid: rowid,
               ),
@@ -6579,6 +6778,9 @@ class $$VehiclesTableTableManager
                 Value<String> taxDueDate = const Value.absent(),
                 Value<int> currentMileage = const Value.absent(),
                 Value<String> notes = const Value.absent(),
+                Value<bool> dvlaVerified = const Value.absent(),
+                Value<String> taxStatus = const Value.absent(),
+                Value<String> motStatus = const Value.absent(),
                 Value<String> photoPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VehiclesCompanion.insert(
@@ -6634,6 +6836,9 @@ class $$VehiclesTableTableManager
                 taxDueDate: taxDueDate,
                 currentMileage: currentMileage,
                 notes: notes,
+                dvlaVerified: dvlaVerified,
+                taxStatus: taxStatus,
+                motStatus: motStatus,
                 photoPath: photoPath,
                 rowid: rowid,
               ),

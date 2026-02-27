@@ -29,7 +29,7 @@ class Vehicle with _$Vehicle {
     @Default('') String purchaseDate,
     @Default(0) double purchasePrice,
     @Default('') String purchasedFrom,
-    @Default('owned') String ownership,
+    @Default('') String ownership,
     @Default('') String financeCompany,
     @Default('') String agreementNumber,
     @Default(0) double deposit,
@@ -65,6 +65,10 @@ class Vehicle with _$Vehicle {
     // Status
     @Default(0) int currentMileage,
     @Default('') String notes,
+    // DVLA lookup
+    @Default(false) bool dvlaVerified,
+    @Default('') String taxStatus,
+    @Default('') String motStatus,
     // Photo
     @Default('') String photoPath,
   }) = _Vehicle;

@@ -66,3 +66,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment config
+.env
+change.md

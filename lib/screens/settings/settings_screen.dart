@@ -17,6 +17,7 @@ import 'package:my_vehicles/providers/document_provider.dart';
 import 'package:my_vehicles/providers/settings_provider.dart';
 import 'package:my_vehicles/providers/tip_jar_provider.dart';
 import 'package:my_vehicles/services/backup_service.dart';
+import 'package:my_vehicles/services/dvla_service.dart';
 import 'package:my_vehicles/services/integrity_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
@@ -34,8 +35,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isBackingUp = false;
   bool _isRestoring = false;
   bool _isChecking = false;
+  bool _isLookingUp = false;
   AutoBackupInfo? _autoBackupInfo;
   Map<String, dynamic>? _fileSystemStats;
+  final _dvlaRegController = TextEditingController();
+  String? _dvlaDiagResult;
 
   @override
   void initState() {
@@ -103,6 +107,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     } catch (e) {
       debugPrint('Failed to load file system stats: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _dvlaRegController.dispose();
+    super.dispose();
+  }
+
+  // --- DVLA Diagnostic ---
+
+  Future<void> _testDvlaLookup() async {
+    final reg = _dvlaRegController.text.trim();
+    if (reg.isEmpty) return;
+
+    setState(() {
+      _isLookingUp = true;
+      _dvlaDiagResult = null;
+    });
+    try {
+      final result = await DvlaService.diagnosticLookup(reg);
+      if (mounted) setState(() => _dvlaDiagResult = result);
+    } catch (e) {
+      if (mounted) setState(() => _dvlaDiagResult = 'Error: $e');
+    } finally {
+      if (mounted) setState(() => _isLookingUp = false);
     }
   }
 
@@ -556,6 +586,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
+
+          if (DvlaService.isAvailable) ...[
+            const SizedBox(height: 24),
+
+            // Vehicle Lookup section
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text('Vehicle Lookup',
+                  style: AppTextStyles.subheading
+                      .copyWith(color: AppColors.primary)),
+            ),
+
+            Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _dvlaRegController,
+                            decoration: const InputDecoration(
+                              labelText: 'Registration',
+                              isDense: true,
+                            ),
+                            textCapitalization: TextCapitalization.characters,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        _isLookingUp
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : ElevatedButton(
+                                onPressed: _testDvlaLookup,
+                                child: const Text('Test Lookup'),
+                              ),
+                      ],
+                    ),
+                    if (_dvlaDiagResult != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _dvlaDiagResult!,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
 
           const SizedBox(height: 24),
 

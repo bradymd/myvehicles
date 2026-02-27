@@ -74,7 +74,10 @@ mixin _$Vehicle {
   String get motDueDate => throw _privateConstructorUsedError;
   String get taxDueDate => throw _privateConstructorUsedError; // Status
   int get currentMileage => throw _privateConstructorUsedError;
-  String get notes => throw _privateConstructorUsedError; // Photo
+  String get notes => throw _privateConstructorUsedError; // DVLA lookup
+  bool get dvlaVerified => throw _privateConstructorUsedError;
+  String get taxStatus => throw _privateConstructorUsedError;
+  String get motStatus => throw _privateConstructorUsedError; // Photo
   String get photoPath => throw _privateConstructorUsedError;
 
   /// Serializes this Vehicle to a JSON map.
@@ -144,6 +147,9 @@ abstract class $VehicleCopyWith<$Res> {
     String taxDueDate,
     int currentMileage,
     String notes,
+    bool dvlaVerified,
+    String taxStatus,
+    String motStatus,
     String photoPath,
   });
 }
@@ -215,6 +221,9 @@ class _$VehicleCopyWithImpl<$Res, $Val extends Vehicle>
     Object? taxDueDate = null,
     Object? currentMileage = null,
     Object? notes = null,
+    Object? dvlaVerified = null,
+    Object? taxStatus = null,
+    Object? motStatus = null,
     Object? photoPath = null,
   }) {
     return _then(
@@ -427,6 +436,18 @@ class _$VehicleCopyWithImpl<$Res, $Val extends Vehicle>
                 ? _value.notes
                 : notes // ignore: cast_nullable_to_non_nullable
                       as String,
+            dvlaVerified: null == dvlaVerified
+                ? _value.dvlaVerified
+                : dvlaVerified // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            taxStatus: null == taxStatus
+                ? _value.taxStatus
+                : taxStatus // ignore: cast_nullable_to_non_nullable
+                      as String,
+            motStatus: null == motStatus
+                ? _value.motStatus
+                : motStatus // ignore: cast_nullable_to_non_nullable
+                      as String,
             photoPath: null == photoPath
                 ? _value.photoPath
                 : photoPath // ignore: cast_nullable_to_non_nullable
@@ -498,6 +519,9 @@ abstract class _$$VehicleImplCopyWith<$Res> implements $VehicleCopyWith<$Res> {
     String taxDueDate,
     int currentMileage,
     String notes,
+    bool dvlaVerified,
+    String taxStatus,
+    String motStatus,
     String photoPath,
   });
 }
@@ -568,6 +592,9 @@ class __$$VehicleImplCopyWithImpl<$Res>
     Object? taxDueDate = null,
     Object? currentMileage = null,
     Object? notes = null,
+    Object? dvlaVerified = null,
+    Object? taxStatus = null,
+    Object? motStatus = null,
     Object? photoPath = null,
   }) {
     return _then(
@@ -780,6 +807,18 @@ class __$$VehicleImplCopyWithImpl<$Res>
             ? _value.notes
             : notes // ignore: cast_nullable_to_non_nullable
                   as String,
+        dvlaVerified: null == dvlaVerified
+            ? _value.dvlaVerified
+            : dvlaVerified // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        taxStatus: null == taxStatus
+            ? _value.taxStatus
+            : taxStatus // ignore: cast_nullable_to_non_nullable
+                  as String,
+        motStatus: null == motStatus
+            ? _value.motStatus
+            : motStatus // ignore: cast_nullable_to_non_nullable
+                  as String,
         photoPath: null == photoPath
             ? _value.photoPath
             : photoPath // ignore: cast_nullable_to_non_nullable
@@ -813,7 +852,7 @@ class _$VehicleImpl extends _Vehicle {
     this.purchaseDate = '',
     this.purchasePrice = 0,
     this.purchasedFrom = '',
-    this.ownership = 'owned',
+    this.ownership = '',
     this.financeCompany = '',
     this.agreementNumber = '',
     this.deposit = 0,
@@ -845,6 +884,9 @@ class _$VehicleImpl extends _Vehicle {
     this.taxDueDate = '',
     this.currentMileage = 0,
     this.notes = '',
+    this.dvlaVerified = false,
+    this.taxStatus = '',
+    this.motStatus = '',
     this.photoPath = '',
   }) : super._();
 
@@ -1011,6 +1053,16 @@ class _$VehicleImpl extends _Vehicle {
   @override
   @JsonKey()
   final String notes;
+  // DVLA lookup
+  @override
+  @JsonKey()
+  final bool dvlaVerified;
+  @override
+  @JsonKey()
+  final String taxStatus;
+  @override
+  @JsonKey()
+  final String motStatus;
   // Photo
   @override
   @JsonKey()
@@ -1018,7 +1070,7 @@ class _$VehicleImpl extends _Vehicle {
 
   @override
   String toString() {
-    return 'Vehicle(id: $id, registration: $registration, make: $make, model: $model, year: $year, colour: $colour, fuelType: $fuelType, transmission: $transmission, vin: $vin, variant: $variant, bodyType: $bodyType, engineCC: $engineCC, engineNumber: $engineNumber, keyNumber: $keyNumber, chassisNumber: $chassisNumber, radioCode: $radioCode, description: $description, purchaseDate: $purchaseDate, purchasePrice: $purchasePrice, purchasedFrom: $purchasedFrom, ownership: $ownership, financeCompany: $financeCompany, agreementNumber: $agreementNumber, deposit: $deposit, monthlyPayment: $monthlyPayment, financeStartDate: $financeStartDate, financeEndDate: $financeEndDate, balloonPayment: $balloonPayment, annualMileageAllowance: $annualMileageAllowance, numberOfPayments: $numberOfPayments, lessor: $lessor, agreementHolder: $agreementHolder, ownershipNotes: $ownershipNotes, insurer: $insurer, insurancePolicyNumber: $insurancePolicyNumber, insuranceRenewalDate: $insuranceRenewalDate, insuranceType: $insuranceType, insuredDrivers: $insuredDrivers, insuranceAnnualCost: $insuranceAnnualCost, breakdownProvider: $breakdownProvider, breakdownMembershipNumber: $breakdownMembershipNumber, breakdownContact: $breakdownContact, breakdownNotes: $breakdownNotes, recoveryProvider: $recoveryProvider, recoveryArrangedVia: $recoveryArrangedVia, recoveryReference: $recoveryReference, recoveryContact: $recoveryContact, recoveryNotes: $recoveryNotes, motDueDate: $motDueDate, taxDueDate: $taxDueDate, currentMileage: $currentMileage, notes: $notes, photoPath: $photoPath)';
+    return 'Vehicle(id: $id, registration: $registration, make: $make, model: $model, year: $year, colour: $colour, fuelType: $fuelType, transmission: $transmission, vin: $vin, variant: $variant, bodyType: $bodyType, engineCC: $engineCC, engineNumber: $engineNumber, keyNumber: $keyNumber, chassisNumber: $chassisNumber, radioCode: $radioCode, description: $description, purchaseDate: $purchaseDate, purchasePrice: $purchasePrice, purchasedFrom: $purchasedFrom, ownership: $ownership, financeCompany: $financeCompany, agreementNumber: $agreementNumber, deposit: $deposit, monthlyPayment: $monthlyPayment, financeStartDate: $financeStartDate, financeEndDate: $financeEndDate, balloonPayment: $balloonPayment, annualMileageAllowance: $annualMileageAllowance, numberOfPayments: $numberOfPayments, lessor: $lessor, agreementHolder: $agreementHolder, ownershipNotes: $ownershipNotes, insurer: $insurer, insurancePolicyNumber: $insurancePolicyNumber, insuranceRenewalDate: $insuranceRenewalDate, insuranceType: $insuranceType, insuredDrivers: $insuredDrivers, insuranceAnnualCost: $insuranceAnnualCost, breakdownProvider: $breakdownProvider, breakdownMembershipNumber: $breakdownMembershipNumber, breakdownContact: $breakdownContact, breakdownNotes: $breakdownNotes, recoveryProvider: $recoveryProvider, recoveryArrangedVia: $recoveryArrangedVia, recoveryReference: $recoveryReference, recoveryContact: $recoveryContact, recoveryNotes: $recoveryNotes, motDueDate: $motDueDate, taxDueDate: $taxDueDate, currentMileage: $currentMileage, notes: $notes, dvlaVerified: $dvlaVerified, taxStatus: $taxStatus, motStatus: $motStatus, photoPath: $photoPath)';
   }
 
   @override
@@ -1122,6 +1174,12 @@ class _$VehicleImpl extends _Vehicle {
             (identical(other.currentMileage, currentMileage) ||
                 other.currentMileage == currentMileage) &&
             (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.dvlaVerified, dvlaVerified) ||
+                other.dvlaVerified == dvlaVerified) &&
+            (identical(other.taxStatus, taxStatus) ||
+                other.taxStatus == taxStatus) &&
+            (identical(other.motStatus, motStatus) ||
+                other.motStatus == motStatus) &&
             (identical(other.photoPath, photoPath) ||
                 other.photoPath == photoPath));
   }
@@ -1182,6 +1240,9 @@ class _$VehicleImpl extends _Vehicle {
     taxDueDate,
     currentMileage,
     notes,
+    dvlaVerified,
+    taxStatus,
+    motStatus,
     photoPath,
   ]);
 
@@ -1253,6 +1314,9 @@ abstract class _Vehicle extends Vehicle {
     final String taxDueDate,
     final int currentMileage,
     final String notes,
+    final bool dvlaVerified,
+    final String taxStatus,
+    final String motStatus,
     final String photoPath,
   }) = _$VehicleImpl;
   const _Vehicle._() : super._();
@@ -1362,7 +1426,13 @@ abstract class _Vehicle extends Vehicle {
   @override
   int get currentMileage;
   @override
-  String get notes; // Photo
+  String get notes; // DVLA lookup
+  @override
+  bool get dvlaVerified;
+  @override
+  String get taxStatus;
+  @override
+  String get motStatus; // Photo
   @override
   String get photoPath;
 

@@ -13,6 +13,7 @@ import 'package:my_vehicles/providers/document_provider.dart';
 import 'package:my_vehicles/providers/mot_provider.dart';
 import 'package:my_vehicles/providers/service_provider.dart';
 import 'package:my_vehicles/services/document_service.dart';
+import 'package:my_vehicles/services/dvla_service.dart';
 import 'package:my_vehicles/services/file_attributes_service.dart';
 import 'package:my_vehicles/widgets/app_scaffold.dart';
 import 'package:path_provider/path_provider.dart';
@@ -49,6 +50,8 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
   String _fuelType = 'petrol';
   String _transmission = '';
   String _photoPath = '';
+  bool _isLookingUp = false;
+  Map<String, dynamic>? _dvlaData;
 
   @override
   void initState() {
@@ -120,7 +123,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
         vehicles.where((v) => v.id == widget.vehicleId).firstOrNull;
     if (vehicle == null) return;
 
-    final updated = vehicle.copyWith(
+    var updated = vehicle.copyWith(
       registration: _registrationCtrl.text.trim(),
       make: _makeCtrl.text.trim(),
       model: _modelCtrl.text.trim(),
@@ -140,11 +143,40 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
       description: _descriptionCtrl.text.trim(),
       photoPath: _photoPath,
     );
+    // Apply DVLA data if a lookup was performed during this edit
+    if (_dvlaData != null) {
+      updated = DvlaService.applyLookupToVehicle(updated, _dvlaData!);
+    }
     await ref.read(vehiclesProvider.notifier).updateVehicle(updated);
     setState(() => _isEditing = false);
   }
 
   void _cancel() => setState(() => _isEditing = false);
+
+  Future<void> _dvlaLookup() async {
+    final reg = _registrationCtrl.text.trim();
+    if (reg.isEmpty) return;
+
+    setState(() => _isLookingUp = true);
+    try {
+      final data = await DvlaService.lookupRegistration(reg);
+      if (data == null || !mounted) return;
+
+      _dvlaData = data;
+      final temp = DvlaService.applyLookupToVehicle(Vehicle(id: ''), data);
+      setState(() {
+        _makeCtrl.text = temp.make;
+        _yearCtrl.text = temp.year;
+        _colourCtrl.text = temp.colour;
+        _fuelType = temp.fuelType;
+        _engineCCCtrl.text = temp.engineCC;
+      });
+    } catch (_) {
+      // Silent failure
+    } finally {
+      if (mounted) setState(() => _isLookingUp = false);
+    }
+  }
 
   void _showPhotoOptions() {
     showModalBottomSheet(
@@ -425,7 +457,25 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
           const SizedBox(height: 12),
           TextFormField(
             controller: _registrationCtrl,
-            decoration: const InputDecoration(labelText: 'Registration'),
+            decoration: InputDecoration(
+              labelText: 'Registration',
+              suffixIcon: DvlaService.isAvailable
+                  ? _isLookingUp
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.search_rounded),
+                          tooltip: 'Look up with DVLA',
+                          onPressed: _dvlaLookup,
+                        )
+                  : null,
+            ),
             textCapitalization: TextCapitalization.characters,
           ),
           const SizedBox(height: 12),

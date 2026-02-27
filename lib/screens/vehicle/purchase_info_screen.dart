@@ -257,11 +257,9 @@ class _PurchaseInfoScreenState extends ConsumerState<PurchaseInfoScreen> {
 
   Widget _buildDisplay(Vehicle vehicle) {
     final ownershipLabel = OwnershipType.values
-        .firstWhere(
-          (e) => e.name == vehicle.ownership,
-          orElse: () => OwnershipType.owned,
-        )
-        .label;
+        .where((e) => e.name == vehicle.ownership)
+        .firstOrNull
+        ?.label ?? 'Not set';
     final isOwned = vehicle.ownership == OwnershipType.owned.name;
     final isPcp = vehicle.ownership == OwnershipType.pcp.name;
     final hasMileage = vehicle.ownership == OwnershipType.pcp.name ||

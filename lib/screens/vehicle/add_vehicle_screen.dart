@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:my_vehicles/constants/enums.dart';
 import 'package:my_vehicles/models/vehicle.dart';
 import 'package:my_vehicles/providers/vehicle_provider.dart';
+import 'package:my_vehicles/services/dvla_service.dart';
 import 'package:my_vehicles/services/file_attributes_service.dart';
 import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
@@ -36,7 +37,14 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   String _fuelType = 'petrol';
   String _transmission = '';
   final _mileageController = TextEditingController();
+  final _engineCCController = TextEditingController();
+  final _motDueDateController = TextEditingController();
+  final _taxDueDateController = TextEditingController();
   String _photoPath = '';
+  bool _isLookingUp = false;
+  bool _dvlaVerified = false;
+  String _taxStatus = '';
+  String _motStatus = '';
 
   // Keep existing data when editing so we don't lose other fields
   Vehicle? _existingVehicle;
@@ -67,7 +75,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     _transmission = v.transmission;
     _mileageController.text =
         v.currentMileage > 0 ? v.currentMileage.toString() : '';
+    _engineCCController.text = v.engineCC;
+    _motDueDateController.text = v.motDueDate;
+    _taxDueDateController.text = v.taxDueDate;
     _photoPath = v.photoPath;
+    _dvlaVerified = v.dvlaVerified;
+    _taxStatus = v.taxStatus;
+    _motStatus = v.motStatus;
     setState(() {});
   }
 
@@ -79,7 +93,44 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     _yearController.dispose();
     _colourController.dispose();
     _mileageController.dispose();
+    _engineCCController.dispose();
+    _motDueDateController.dispose();
+    _taxDueDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _dvlaLookup() async {
+    final reg = _registrationController.text.trim();
+    if (reg.isEmpty) return;
+
+    setState(() => _isLookingUp = true);
+    try {
+      final data = await DvlaService.lookupRegistration(reg);
+      if (data == null || !mounted) return;
+
+      // Apply lookup to a temporary vehicle to get transformed values
+      final temp = DvlaService.applyLookupToVehicle(
+        Vehicle(id: ''),
+        data,
+      );
+
+      setState(() {
+        _makeController.text = temp.make;
+        _yearController.text = temp.year;
+        _colourController.text = temp.colour;
+        _fuelType = temp.fuelType;
+        _engineCCController.text = temp.engineCC;
+        _motDueDateController.text = temp.motDueDate;
+        _taxDueDateController.text = temp.taxDueDate;
+        _dvlaVerified = true;
+        _taxStatus = temp.taxStatus;
+        _motStatus = temp.motStatus;
+      });
+    } catch (_) {
+      // Silent failure — user fills in manually
+    } finally {
+      if (mounted) setState(() => _isLookingUp = false);
+    }
   }
 
   void _showPhotoOptions() {
@@ -170,6 +221,20 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     setState(() => _photoPath = relativePath);
   }
 
+  Future<void> _pickDate(TextEditingController controller) async {
+    final initial = DateTime.tryParse(controller.text) ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2040),
+    );
+    if (picked != null) {
+      controller.text =
+          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -186,6 +251,12 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       fuelType: _fuelType,
       transmission: _transmission,
       currentMileage: int.tryParse(_mileageController.text.trim()) ?? 0,
+      engineCC: _engineCCController.text.trim(),
+      motDueDate: _motDueDateController.text.trim(),
+      taxDueDate: _taxDueDateController.text.trim(),
+      dvlaVerified: _dvlaVerified,
+      taxStatus: _taxStatus,
+      motStatus: _motStatus,
       photoPath: _photoPath,
     );
 
@@ -286,10 +357,29 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                 ),
               ),
 
-              // Registration
+              // Registration with DVLA lookup
               TextFormField(
                 controller: _registrationController,
-                decoration: const InputDecoration(labelText: 'Registration'),
+                decoration: InputDecoration(
+                  labelText: 'Registration',
+                  suffixIcon: DvlaService.isAvailable
+                      ? _isLookingUp
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2),
+                              ),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.search_rounded),
+                              tooltip: 'Look up with DVLA',
+                              onPressed: _dvlaLookup,
+                            )
+                      : null,
+                ),
                 textCapitalization: TextCapitalization.characters,
               ),
               const SizedBox(height: 12),
@@ -370,12 +460,67 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Mileage
-              TextFormField(
-                controller: _mileageController,
-                decoration:
-                    const InputDecoration(labelText: 'Current Mileage'),
-                keyboardType: TextInputType.number,
+              // Engine CC + Mileage
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _engineCCController,
+                      decoration:
+                          const InputDecoration(labelText: 'Engine CC'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _mileageController,
+                      decoration:
+                          const InputDecoration(labelText: 'Current Mileage'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // MOT Expiry + Tax Due
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _motDueDateController,
+                      decoration: InputDecoration(
+                        labelText: 'MOT Expiry',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today_rounded,
+                              size: 20),
+                          onPressed: () =>
+                              _pickDate(_motDueDateController),
+                        ),
+                      ),
+                      readOnly: true,
+                      onTap: () => _pickDate(_motDueDateController),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _taxDueDateController,
+                      decoration: InputDecoration(
+                        labelText: 'Tax Due',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today_rounded,
+                              size: 20),
+                          onPressed: () =>
+                              _pickDate(_taxDueDateController),
+                        ),
+                      ),
+                      readOnly: true,
+                      onTap: () => _pickDate(_taxDueDateController),
+                    ),
+                  ),
+                ],
               ),
 
               // Save button

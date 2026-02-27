@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_vehicles/app.dart';
 import 'package:my_vehicles/services/backup_service.dart';
@@ -9,6 +10,13 @@ void main() async {
 
   // Cache app directory path before UI renders for synchronous path resolution
   await DocumentService.init();
+
+  // Load environment config (API keys etc.) — silent if .env missing
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env not present — DVLA lookup will be unavailable
+  }
 
   runApp(
     const ProviderScope(

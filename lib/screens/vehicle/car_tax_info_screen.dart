@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_vehicles/models/vehicle.dart';
 import 'package:my_vehicles/providers/vehicle_provider.dart';
+import 'package:my_vehicles/services/dvla_service.dart';
 import 'package:my_vehicles/theme/app_colors.dart';
 import 'package:my_vehicles/theme/app_text_styles.dart';
 import 'package:my_vehicles/utils/date_helpers.dart';
@@ -19,6 +20,7 @@ class CarTaxInfoScreen extends ConsumerStatefulWidget {
 
 class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
   bool _isEditing = false;
+  bool _isCheckingDvla = false;
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _taxDueDateCtrl;
@@ -55,6 +57,25 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
   }
 
   void _cancel() => setState(() => _isEditing = false);
+
+  Future<void> _checkWithDvla(Vehicle vehicle) async {
+    setState(() => _isCheckingDvla = true);
+    try {
+      final data =
+          await DvlaService.lookupRegistration(vehicle.registration);
+      if (data == null || !mounted) return;
+
+      final updated = vehicle.copyWith(
+        taxDueDate: (data['taxDueDate'] as String?) ?? vehicle.taxDueDate,
+        taxStatus: (data['taxStatus'] as String?) ?? vehicle.taxStatus,
+      );
+      await ref.read(vehiclesProvider.notifier).updateVehicle(updated);
+    } catch (_) {
+      // Silent failure
+    } finally {
+      if (mounted) setState(() => _isCheckingDvla = false);
+    }
+  }
 
   Future<void> _pickDate(TextEditingController controller) async {
     final picked = await showDatePicker(
@@ -127,11 +148,12 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                isLeased
-                    ? _buildLeasedNotice(vehicle)
-                    : _isEditing
-                        ? _buildForm()
-                        : _buildDisplay(vehicle),
+                if (isLeased)
+                  _buildLeasedNotice(vehicle)
+                else if (_isEditing)
+                  _buildForm()
+                else
+                  _buildDisplay(vehicle),
               ],
             ),
           ),
@@ -186,6 +208,23 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
                 style: AppTextStyles.caption,
                 textAlign: TextAlign.center,
               ),
+              if (vehicle.dvlaVerified && vehicle.taxStatus.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'DVLA status: ${vehicle.taxStatus}',
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -201,9 +240,17 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
     final dateStr = vehicle.taxDueDate;
     final days = daysUntil(dateStr);
 
+    // Show "Check with DVLA" when vehicle is DVLA-verified and tax is expired or due within 30 days
+    final showDvlaCheck = vehicle.dvlaVerified &&
+        DvlaService.isAvailable &&
+        dateStr.isNotEmpty &&
+        (isPastDate(dateStr) || isDueSoon(dateStr));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (vehicle.taxStatus.isNotEmpty)
+          _infoRow('DVLA Status', vehicle.taxStatus),
         _infoRow('Tax Due Date', dateStr.isNotEmpty ? formatDateUK(dateStr) : ''),
         if (dateStr.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -248,6 +295,23 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+        if (showDvlaCheck) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _isCheckingDvla ? null : () => _checkWithDvla(vehicle),
+              icon: _isCheckingDvla
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.verified_rounded, size: 18),
+              label: const Text('Check with DVLA'),
             ),
           ),
         ],

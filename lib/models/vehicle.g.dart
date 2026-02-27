@@ -29,7 +29,7 @@ _$VehicleImpl _$$VehicleImplFromJson(
   purchaseDate: json['purchaseDate'] as String? ?? '',
   purchasePrice: (json['purchasePrice'] as num?)?.toDouble() ?? 0,
   purchasedFrom: json['purchasedFrom'] as String? ?? '',
-  ownership: json['ownership'] as String? ?? 'owned',
+  ownership: json['ownership'] as String? ?? '',
   financeCompany: json['financeCompany'] as String? ?? '',
   agreementNumber: json['agreementNumber'] as String? ?? '',
   deposit: (json['deposit'] as num?)?.toDouble() ?? 0,
@@ -62,6 +62,9 @@ _$VehicleImpl _$$VehicleImplFromJson(
   taxDueDate: json['taxDueDate'] as String? ?? '',
   currentMileage: (json['currentMileage'] as num?)?.toInt() ?? 0,
   notes: json['notes'] as String? ?? '',
+  dvlaVerified: json['dvlaVerified'] as bool? ?? false,
+  taxStatus: json['taxStatus'] as String? ?? '',
+  motStatus: json['motStatus'] as String? ?? '',
   photoPath: json['photoPath'] as String? ?? '',
 );
 
@@ -119,5 +122,8 @@ Map<String, dynamic> _$$VehicleImplToJson(_$VehicleImpl instance) =>
       'taxDueDate': instance.taxDueDate,
       'currentMileage': instance.currentMileage,
       'notes': instance.notes,
+      'dvlaVerified': instance.dvlaVerified,
+      'taxStatus': instance.taxStatus,
+      'motStatus': instance.motStatus,
       'photoPath': instance.photoPath,
     };

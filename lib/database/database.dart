@@ -32,7 +32,7 @@ class Vehicles extends Table {
   TextColumn get purchaseDate => text().withDefault(const Constant(''))();
   RealColumn get purchasePrice => real().withDefault(const Constant(0))();
   TextColumn get purchasedFrom => text().withDefault(const Constant(''))();
-  TextColumn get ownership => text().withDefault(const Constant('owned'))();
+  TextColumn get ownership => text().withDefault(const Constant(''))();
   TextColumn get financeCompany => text().withDefault(const Constant(''))();
   TextColumn get agreementNumber => text().withDefault(const Constant(''))();
   RealColumn get deposit => real().withDefault(const Constant(0))();
@@ -69,6 +69,9 @@ class Vehicles extends Table {
   TextColumn get taxDueDate => text().withDefault(const Constant(''))();
   IntColumn get currentMileage => integer().withDefault(const Constant(0))();
   TextColumn get notes => text().withDefault(const Constant(''))();
+  BoolColumn get dvlaVerified => boolean().withDefault(const Constant(false))();
+  TextColumn get taxStatus => text().withDefault(const Constant(''))();
+  TextColumn get motStatus => text().withDefault(const Constant(''))();
   TextColumn get photoPath => text().withDefault(const Constant(''))();
 
   @override
@@ -167,7 +170,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -248,6 +251,11 @@ class AppDatabase extends _$AppDatabase {
               'licence_photo_back',
               ['my_vehicles_docs'],
             );
+          }
+          if (from < 13) {
+            await migrator.addColumn(vehicles, vehicles.dvlaVerified);
+            await migrator.addColumn(vehicles, vehicles.taxStatus);
+            await migrator.addColumn(vehicles, vehicles.motStatus);
           }
         },
       );
@@ -360,6 +368,9 @@ class AppDatabase extends _$AppDatabase {
         taxDueDate: Value(v.taxDueDate),
         currentMileage: Value(v.currentMileage),
         notes: Value(v.notes),
+        dvlaVerified: Value(v.dvlaVerified),
+        taxStatus: Value(v.taxStatus),
+        motStatus: Value(v.motStatus),
         photoPath: Value(v.photoPath),
       ),
     );
@@ -593,6 +604,9 @@ class AppDatabase extends _$AppDatabase {
         taxDueDate: r.taxDueDate,
         currentMileage: r.currentMileage,
         notes: r.notes,
+        dvlaVerified: r.dvlaVerified,
+        taxStatus: r.taxStatus,
+        motStatus: r.motStatus,
         photoPath: r.photoPath,
       );
 
