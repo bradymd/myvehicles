@@ -1,26 +1,28 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
-/// Simple .env loader that reads key=value pairs.
-/// Tries Flutter asset first, then file system fallback for development.
+/// Provides environment config from compile-time --dart-define values,
+/// with .env file fallback for local desktop development.
+///
+/// Build with: flutter build appbundle --dart-define=DVLA_API_KEY=xxx
+/// Or for Codemagic: add --dart-define=DVLA_API_KEY=xxx to build arguments
 class EnvService {
+  static const _compileDvlaKey =
+      String.fromEnvironment('DVLA_API_KEY', defaultValue: '');
+
   static final Map<String, String> _env = {};
 
   static Map<String, String> get env => _env;
 
   static Future<void> init() async {
-    // Try loading from Flutter assets first
-    try {
-      final content = await rootBundle.loadString('.env');
-      _parse(content);
+    // Compile-time keys take priority (works on all platforms)
+    if (_compileDvlaKey.isNotEmpty) {
+      _env['DVLA_API_KEY'] = _compileDvlaKey;
       return;
-    } catch (_) {
-      // Not in assets — try file system
     }
 
-    // Fallback: read from project root (works for local dev on desktop)
+    // Fallback: read .env from project root (local desktop dev only)
     try {
       final file = File('.env');
       if (file.existsSync()) {
