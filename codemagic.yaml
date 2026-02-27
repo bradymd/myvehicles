@@ -26,7 +26,6 @@ workflows:
       cocoapods: default
       groups:
         - app_store_credentials
-        - dvla_api
       vars:
         BUNDLE_ID: "com.bradymd.myvehicles"
 
