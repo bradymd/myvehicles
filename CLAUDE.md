@@ -28,6 +28,7 @@
 - 1.0.5+6 - Android NDK 27 upgrade, simplified vehicle details navigation
 - 1.0.6+7 - Fix documents/photos not displaying due to unresolved relative paths
 - 1.0.7+8 - Fix licence photos and remaining unresolved path issues (full sweep)
+- 1.0.8+9 - DVLA registration lookup, MOT/tax status from DVLA, ownership default fix
 
 ## Recent Issues & Fixes
 
