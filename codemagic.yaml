@@ -9,6 +9,7 @@
 #   APP_APPLE_ID                   — Your app's Apple ID (numeric, from App Store Connect)
 #
 # Optional:
+#   DVLA_API_KEY                   — DVLA Vehicle Enquiry Service API key
 #   SLACK_WEBHOOK_URL              — Slack incoming webhook for build notifications
 
 workflows:
@@ -25,6 +26,7 @@ workflows:
       cocoapods: default
       groups:
         - app_store_credentials
+        - dvla_api
       vars:
         BUNDLE_ID: "com.bradymd.myvehicles"
 
@@ -77,6 +79,7 @@ workflows:
           flutter build ipa --release \
             --build-name=1.0.0 \
             --build-number=$BUILD_NUMBER \
+            --dart-define=DVLA_API_KEY=$DVLA_API_KEY \
             --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
