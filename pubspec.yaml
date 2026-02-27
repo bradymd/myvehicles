@@ -36,7 +36,6 @@ dependencies:
   open_file: ^3.5.11
   in_app_purchase: ^3.2.0
   http: ^1.2.0
-  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -59,4 +58,3 @@ flutter:
     - assets/images/mot-passed.png
     - assets/images/mot-failed.png
     - assets/demo_backup.zip
-    - .env

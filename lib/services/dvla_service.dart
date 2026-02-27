@@ -1,21 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_vehicles/models/vehicle.dart';
+import 'package:my_vehicles/services/env_service.dart';
 
 class DvlaService {
   static const _endpoint =
       'https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles';
 
-  static String? get apiKey {
-    try {
-      return dotenv.env['DVLA_API_KEY'];
-    } catch (_) {
-      return null;
-    }
-  }
+  static String? get apiKey => EnvService.env['DVLA_API_KEY'];
 
   static bool get isAvailable => (apiKey ?? '').isNotEmpty;
 

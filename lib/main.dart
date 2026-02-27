@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_vehicles/app.dart';
 import 'package:my_vehicles/services/backup_service.dart';
 import 'package:my_vehicles/services/document_service.dart';
+import 'package:my_vehicles/services/env_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,11 +12,7 @@ void main() async {
   await DocumentService.init();
 
   // Load environment config (API keys etc.) — silent if .env missing
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // .env not present — DVLA lookup will be unavailable
-  }
+  await EnvService.init();
 
   runApp(
     const ProviderScope(
