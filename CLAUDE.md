@@ -29,6 +29,7 @@
 - 1.0.6+7 - Fix documents/photos not displaying due to unresolved relative paths
 - 1.0.7+8 - Fix licence photos and remaining unresolved path issues (full sweep)
 - 1.0.8+9 - DVLA registration lookup, MOT/tax status from DVLA, ownership default fix
+- 1.0.9+10 - App Store submission, namespaced IAP product IDs, Android debug symbols, iOS/Android version sync
 
 ## Recent Issues & Fixes
 
