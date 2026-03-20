@@ -228,10 +228,15 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       final relativePath = p.join('vehicle_photos', filename);
 
       if (!mounted) return;
-      // Use in-memory bytes for immediate display — bypasses Image.file cache
+      // Use in-memory bytes for immediate display — bypasses Image.file cache.
+      // addPostFrameCallback forces a rebuild after the Flutter engine resumes
+      // from the paused state caused by the iOS native picker presentation.
       setState(() {
         _photoPath = relativePath;
         _photoBytes = bytes;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
       });
     } catch (e) {
       if (!mounted) return;
