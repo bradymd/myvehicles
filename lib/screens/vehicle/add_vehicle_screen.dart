@@ -215,22 +215,30 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       // Mark directory for iOS backup to ensure it persists through app updates
       await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
-    final ext = p.extension(picked.path).isNotEmpty
-        ? p.extension(picked.path)
-        : '.jpg';
-    final filename = 'vehicle_${generateId()}$ext';
-    final absolutePath = p.join(photosDir.path, filename);
-    final bytes = await picked.readAsBytes();
-    await File(absolutePath).writeAsBytes(bytes);
+    try {
+      final ext = p.extension(picked.path).isNotEmpty
+          ? p.extension(picked.path)
+          : '.jpg';
+      final filename = 'vehicle_${generateId()}$ext';
+      final absolutePath = p.join(photosDir.path, filename);
+      await File(picked.path).copy(absolutePath);
+      final bytes = await File(absolutePath).readAsBytes();
 
-    // Store relative path for portability across app updates
-    final relativePath = p.join('vehicle_photos', filename);
+      // Store relative path for portability across app updates
+      final relativePath = p.join('vehicle_photos', filename);
 
-    // Use in-memory bytes for immediate display — bypasses Image.file cache
-    setState(() {
-      _photoPath = relativePath;
-      _photoBytes = bytes;
-    });
+      if (!mounted) return;
+      // Use in-memory bytes for immediate display — bypasses Image.file cache
+      setState(() {
+        _photoPath = relativePath;
+        _photoBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Photo error: $e')),
+      );
+    }
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
