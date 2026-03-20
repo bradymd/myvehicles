@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,7 +41,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   final _motDueDateController = TextEditingController();
   final _taxDueDateController = TextEditingController();
   String _photoPath = '';
-  Uint8List? _photoBytes; // In-memory bytes for newly picked photo
+  XFile? _pickedFile; // Temp XFile for immediate display after picking
   bool _isLookingUp = false;
   bool _dvlaVerified = false;
   String _taxStatus = '';
@@ -186,7 +185,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                     Navigator.pop(ctx);
                     setState(() {
                       _photoPath = '';
-                      _photoBytes = null;
+                      _pickedFile = null;
                     });
                   },
                 ),
@@ -215,35 +214,21 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       // Mark directory for iOS backup to ensure it persists through app updates
       await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
-    try {
-      final ext = p.extension(picked.path).isNotEmpty
-          ? p.extension(picked.path)
-          : '.jpg';
-      final filename = 'vehicle_${generateId()}$ext';
-      final absolutePath = p.join(photosDir.path, filename);
-      await File(picked.path).copy(absolutePath);
-      final bytes = await File(absolutePath).readAsBytes();
+    final ext = p.extension(picked.path).isNotEmpty
+        ? p.extension(picked.path)
+        : '.jpg';
+    final filename = 'vehicle_${generateId()}$ext';
+    final absolutePath = p.join(photosDir.path, filename);
+    await File(picked.path).copy(absolutePath);
 
-      // Store relative path for portability across app updates
-      final relativePath = p.join('vehicle_photos', filename);
+    // Store relative path for portability across app updates
+    final relativePath = p.join('vehicle_photos', filename);
 
-      if (!mounted) return;
-      // Use in-memory bytes for immediate display — bypasses Image.file cache.
-      // addPostFrameCallback forces a rebuild after the Flutter engine resumes
-      // from the paused state caused by the iOS native picker presentation.
-      setState(() {
-        _photoPath = relativePath;
-        _photoBytes = bytes;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() {});
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Photo error: $e')),
-      );
-    }
+    if (!mounted) return;
+    setState(() {
+      _photoPath = relativePath;
+      _pickedFile = picked; // Display via XFile.path per official docs
+    });
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
@@ -316,7 +301,6 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
               GestureDetector(
                 onTap: _showPhotoOptions,
                 child: Container(
-                  key: ValueKey(_photoPath),
                   height: 160,
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: 20),
@@ -328,14 +312,15 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                     ),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: _photoBytes != null ||
+                  child: _pickedFile != null ||
                           (_photoPath.isNotEmpty &&
                               DocumentService.fileExistsSync(_photoPath))
                       ? Stack(
                           fit: StackFit.expand,
                           children: [
-                            _photoBytes != null
-                                ? Image.memory(_photoBytes!, fit: BoxFit.cover)
+                            _pickedFile != null
+                                ? Image.file(File(_pickedFile!.path),
+                                    fit: BoxFit.cover)
                                 : Image.file(
                                     File(DocumentService.resolvePathSync(
                                         _photoPath)),
