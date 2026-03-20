@@ -210,12 +210,6 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       // Mark directory for iOS backup to ensure it persists through app updates
       await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
-    // Delete old photo file if replacing
-    if (_photoPath.isNotEmpty) {
-      final oldFile = File(DocumentService.resolvePathSync(_photoPath));
-      if (oldFile.existsSync()) oldFile.deleteSync();
-    }
-
     final ext = p.extension(picked.path);
     final filename = 'vehicle_${generateId()}$ext';
     final absolutePath = p.join(photosDir.path, filename);
@@ -223,6 +217,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
 
     // Store relative path for portability across app updates
     final relativePath = p.join('vehicle_photos', filename);
+
+    // Evict any cached image for the old path so the new photo displays immediately
+    if (_photoPath.isNotEmpty) {
+      final oldAbsPath = DocumentService.resolvePathSync(_photoPath);
+      PaintingBinding.instance.imageCache.evict(FileImage(File(oldAbsPath)));
+    }
+
     setState(() => _photoPath = relativePath);
   }
 
