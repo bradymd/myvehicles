@@ -50,6 +50,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
   String _fuelType = 'petrol';
   String _transmission = '';
   String _photoPath = '';
+  XFile? _pickedFile;
   bool _isLookingUp = false;
   Map<String, dynamic>? _dvlaData;
 
@@ -151,7 +152,10 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
     setState(() => _isEditing = false);
   }
 
-  void _cancel() => setState(() => _isEditing = false);
+  void _cancel() => setState(() {
+        _isEditing = false;
+        _pickedFile = null;
+      });
 
   Future<void> _dvlaLookup() async {
     final reg = _registrationCtrl.text.trim();
@@ -227,7 +231,10 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                   title: const Text('Remove Photo'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    setState(() => _photoPath = '');
+                    setState(() {
+                      _photoPath = '';
+                      _pickedFile = null;
+                    });
                   },
                 ),
               ],
@@ -255,14 +262,20 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
       // Mark directory for iOS backup to ensure it persists through app updates
       await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
-    final ext = p.extension(picked.path);
-    final filename = 'vehicle_${widget.vehicleId}$ext';
+    final ext = p.extension(picked.path).isNotEmpty
+        ? p.extension(picked.path)
+        : '.jpg';
+    final filename = 'vehicle_${widget.vehicleId}_${DateTime.now().millisecondsSinceEpoch}$ext';
     final absolutePath = p.join(photosDir.path, filename);
     await File(picked.path).copy(absolutePath);
 
     // Store relative path for portability across app updates
     final relativePath = p.join('vehicle_photos', filename);
-    setState(() => _photoPath = relativePath);
+    if (!mounted) return;
+    setState(() {
+      _photoPath = relativePath;
+      _pickedFile = picked;
+    });
   }
 
   Widget _infoRow(String label, String value) {
@@ -394,14 +407,16 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                 ),
               ),
               clipBehavior: Clip.antiAlias,
-              child: _photoPath.isNotEmpty && DocumentService.fileExistsSync(_photoPath)
+              child: _pickedFile != null || (_photoPath.isNotEmpty && DocumentService.fileExistsSync(_photoPath))
                   ? Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.file(
-                          File(DocumentService.resolvePathSync(_photoPath)),
-                          fit: BoxFit.cover,
-                        ),
+                        _pickedFile != null
+                            ? Image.file(File(_pickedFile!.path), fit: BoxFit.cover)
+                            : Image.file(
+                                File(DocumentService.resolvePathSync(_photoPath)),
+                                fit: BoxFit.cover,
+                              ),
                         Positioned(
                           bottom: 8,
                           right: 8,
