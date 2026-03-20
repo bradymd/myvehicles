@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +42,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   final _motDueDateController = TextEditingController();
   final _taxDueDateController = TextEditingController();
   String _photoPath = '';
+  Uint8List? _photoBytes; // In-memory bytes for newly picked photo
   bool _isLookingUp = false;
   bool _dvlaVerified = false;
   String _taxStatus = '';
@@ -182,7 +184,10 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                   title: const Text('Remove Photo'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    setState(() => _photoPath = '');
+                    setState(() {
+                      _photoPath = '';
+                      _photoBytes = null;
+                    });
                   },
                 ),
               ],
@@ -221,15 +226,11 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     // Store relative path for portability across app updates
     final relativePath = p.join('vehicle_photos', filename);
 
-    // Evict old and new paths from Flutter's image cache (including live images)
-    // so Image.file reloads from disk rather than serving a stale cached version.
-    if (_photoPath.isNotEmpty) {
-      await FileImage(File(DocumentService.resolvePathSync(_photoPath)))
-          .evict();
-    }
-    await FileImage(File(absolutePath)).evict();
-
-    setState(() => _photoPath = relativePath);
+    // Use in-memory bytes for immediate display — bypasses Image.file cache
+    setState(() {
+      _photoPath = relativePath;
+      _photoBytes = bytes;
+    });
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
@@ -314,15 +315,19 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                     ),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: _photoPath.isNotEmpty &&
-                          DocumentService.fileExistsSync(_photoPath)
+                  child: _photoBytes != null ||
+                          (_photoPath.isNotEmpty &&
+                              DocumentService.fileExistsSync(_photoPath))
                       ? Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.file(
-                              File(DocumentService.resolvePathSync(_photoPath)),
-                              fit: BoxFit.cover,
-                            ),
+                            _photoBytes != null
+                                ? Image.memory(_photoBytes!, fit: BoxFit.cover)
+                                : Image.file(
+                                    File(DocumentService.resolvePathSync(
+                                        _photoPath)),
+                                    fit: BoxFit.cover,
+                                  ),
                             Positioned(
                               bottom: 8,
                               right: 8,
