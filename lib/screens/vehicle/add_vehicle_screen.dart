@@ -221,11 +221,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     // Store relative path for portability across app updates
     final relativePath = p.join('vehicle_photos', filename);
 
-    // Evict any cached image for the old path so the new photo displays immediately
+    // Evict old and new paths from Flutter's image cache (including live images)
+    // so Image.file reloads from disk rather than serving a stale cached version.
     if (_photoPath.isNotEmpty) {
-      final oldAbsPath = DocumentService.resolvePathSync(_photoPath);
-      PaintingBinding.instance.imageCache.evict(FileImage(File(oldAbsPath)));
+      await FileImage(File(DocumentService.resolvePathSync(_photoPath)))
+          .evict();
     }
+    await FileImage(File(absolutePath)).evict();
 
     setState(() => _photoPath = relativePath);
   }
