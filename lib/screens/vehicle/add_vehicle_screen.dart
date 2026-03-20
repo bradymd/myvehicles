@@ -210,9 +210,14 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       // Mark directory for iOS backup to ensure it persists through app updates
       await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
+    // Delete old photo file if replacing
+    if (_photoPath.isNotEmpty) {
+      final oldFile = File(DocumentService.resolvePathSync(_photoPath));
+      if (oldFile.existsSync()) oldFile.deleteSync();
+    }
+
     final ext = p.extension(picked.path);
-    final filename =
-        'vehicle_${widget.editVehicleId ?? generateId()}$ext';
+    final filename = 'vehicle_${generateId()}$ext';
     final absolutePath = p.join(photosDir.path, filename);
     await File(picked.path).copy(absolutePath);
 
