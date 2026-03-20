@@ -210,10 +210,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       // Mark directory for iOS backup to ensure it persists through app updates
       await FileAttributesService.markDirectoryForBackup(photosDir.path);
     }
-    final ext = p.extension(picked.path);
+    final ext = p.extension(picked.path).isNotEmpty
+        ? p.extension(picked.path)
+        : '.jpg';
     final filename = 'vehicle_${generateId()}$ext';
     final absolutePath = p.join(photosDir.path, filename);
-    await File(picked.path).copy(absolutePath);
+    final bytes = await picked.readAsBytes();
+    await File(absolutePath).writeAsBytes(bytes);
 
     // Store relative path for portability across app updates
     final relativePath = p.join('vehicle_photos', filename);
@@ -297,6 +300,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
               GestureDetector(
                 onTap: _showPhotoOptions,
                 child: Container(
+                  key: ValueKey(_photoPath),
                   height: 160,
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: 20),
