@@ -52,7 +52,6 @@ workflows:
             --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --save
           keychain add-certificates
-          xcode-project use-profiles
 
       # ── Dependencies ──────────────────────────────────────────────
       - name: Get Flutter packages
@@ -76,6 +75,11 @@ workflows:
       # ── Build ─────────────────────────────────────────────────────
       - name: Build IPA
         script: |
+          # Apply the fetched provisioning profiles to the Xcode project
+          # immediately before archiving (canonical Codemagic ordering).
+          echo "--- provisioning profiles on runner ---"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || true
+          xcode-project use-profiles
           BUILD_NUMBER=$(date +%s)
           echo "Using build number: $BUILD_NUMBER"
           flutter build ipa --release \
