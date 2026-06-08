@@ -21,7 +21,10 @@ workflows:
       app_store_connect: codemagic
 
     environment:
-      flutter: stable
+      # Pinned to the version we develop/analyze against so CI results are
+      # reproducible. `stable` floats and can introduce new lints/breakage
+      # without warning. Bump deliberately when upgrading Flutter locally.
+      flutter: 3.38.9
       xcode: latest
       cocoapods: default
       groups:

@@ -251,7 +251,7 @@ class AppScaffold extends StatelessWidget {
                                 ],
                               ),
                         ),
-                        if (actions != null) ...actions!,
+                        ...?actions,
                         // Hamburger menu — always top right
                         if (showMenuButton) const AppMenuButton(),
                       ],
