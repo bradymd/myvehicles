@@ -1,5 +1,12 @@
 import 'package:intl/intl.dart';
 
+/// Whether DVLA has confirmed the vehicle is currently taxed.
+/// When true, callers should not show a tax-expiry warning even if the
+/// stored tax due date has passed.
+bool isTaxConfirmed(String? taxStatus) {
+  return (taxStatus ?? '').trim().toLowerCase() == 'taxed';
+}
+
 bool isPastDate(String? dateStr) {
   if (dateStr == null || dateStr.isEmpty) return false;
   final date = DateTime.tryParse(dateStr);

@@ -1,7 +1,7 @@
 name: my_vehicles
 description: "MyVehicles - Emergency-first vehicle manager"
 publish_to: 'none'
-version: 1.0.10+11
+version: 1.0.11+12
 
 environment:
   sdk: ^3.10.8
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   flutter_riverpod: ^2.6.1
   drift: ^2.22.1
   sqlite3_flutter_libs: ^0.5.28
@@ -20,11 +20,11 @@ dependencies:
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   intl: ^0.19.0
-  uuid: ^4.5.1
+  uuid: ^4.5.3
   google_fonts: ^6.2.1
   package_info_plus: ^9.0.0
   url_launcher: ^6.3.1
-  image_picker: ^1.1.2
+  image_picker: ^1.2.2
   file_picker: ^8.1.7
   geolocator: ^13.0.2
   geocoding: ^3.0.0
@@ -34,7 +34,7 @@ dependencies:
   archive: ^4.0.2
   share_plus: ^10.1.4
   open_file: ^3.5.11
-  in_app_purchase: ^3.2.0
+  in_app_purchase: ^3.3.0
   http: ^1.2.0
 
 dev_dependencies:

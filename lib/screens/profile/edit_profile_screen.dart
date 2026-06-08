@@ -133,10 +133,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       sourcePath = picked.path;
     }
 
-    final saved = await DocumentService.saveFile(
-      sourcePath!,
-      'licence_${side}_${DateTime.now().millisecondsSinceEpoch}$ext',
-    );
+    final String saved;
+    try {
+      saved = await DocumentService.saveFile(
+        sourcePath!,
+        'licence_${side}_${DateTime.now().millisecondsSinceEpoch}$ext',
+      );
+    } catch (e) {
+      debugPrint('Failed to save licence photo: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Couldn't save the photo. Please try again.")),
+        );
+      }
+      return;
+    }
     setState(() {
       if (side == 'front') {
         _licencePhotoFront = saved;

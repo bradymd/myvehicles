@@ -117,6 +117,12 @@ class _DocumentAttachmentsState extends ConsumerState<DocumentAttachments> {
     );
   }
 
+  void _showSaveError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Couldn't save the file. Please try again.")),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(
@@ -128,7 +134,14 @@ class _DocumentAttachmentsState extends ConsumerState<DocumentAttachments> {
     if (picked == null) return;
 
     final filename = p.basename(picked.path);
-    final savedPath = await DocumentService.saveFile(picked.path, filename);
+    final String savedPath;
+    try {
+      savedPath = await DocumentService.saveFile(picked.path, filename);
+    } catch (e) {
+      debugPrint('Failed to save image: $e');
+      if (mounted) _showSaveError();
+      return;
+    }
     final fileType = DocumentService.getFileType(savedPath);
 
     final now = DateTime.now();
@@ -175,7 +188,14 @@ class _DocumentAttachmentsState extends ConsumerState<DocumentAttachments> {
     if (file.path == null) return;
 
     final filename = file.name;
-    final savedPath = await DocumentService.saveFile(file.path!, filename);
+    final String savedPath;
+    try {
+      savedPath = await DocumentService.saveFile(file.path!, filename);
+    } catch (e) {
+      debugPrint('Failed to save file: $e');
+      if (mounted) _showSaveError();
+      return;
+    }
     final fileType = DocumentService.getFileType(savedPath);
 
     // Skip if this file is already attached to this panel

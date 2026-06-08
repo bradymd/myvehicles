@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_vehicles/app.dart';
+import 'package:my_vehicles/providers/vehicle_provider.dart';
 import 'package:my_vehicles/services/backup_service.dart';
 import 'package:my_vehicles/services/document_service.dart';
 import 'package:my_vehicles/services/env_service.dart';
@@ -21,22 +22,26 @@ void main() async {
   );
 }
 
-/// Watches app lifecycle and triggers auto-backup on close/background,
-/// but no more than once every 4 hours.
-class _AppLifecycleWrapper extends StatefulWidget {
+/// Watches app lifecycle: triggers auto-backup on close/background (no more
+/// than once every 4 hours) and a DVLA tax/MOT refresh on launch and resume
+/// (self-throttled to once a fortnight).
+class _AppLifecycleWrapper extends ConsumerStatefulWidget {
   const _AppLifecycleWrapper({required this.child});
   final Widget child;
 
   @override
-  State<_AppLifecycleWrapper> createState() => _AppLifecycleWrapperState();
+  ConsumerState<_AppLifecycleWrapper> createState() =>
+      _AppLifecycleWrapperState();
 }
 
-class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
+class _AppLifecycleWrapperState extends ConsumerState<_AppLifecycleWrapper>
     with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Refresh DVLA data shortly after launch (off the first frame).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshDvla());
   }
 
   @override
@@ -45,11 +50,17 @@ class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
     super.dispose();
   }
 
+  void _refreshDvla() {
+    ref.read(vehiclesProvider.notifier).refreshFromDvlaIfDue();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _backupIfDue();
+    } else if (state == AppLifecycleState.resumed) {
+      _refreshDvla();
     }
   }
 

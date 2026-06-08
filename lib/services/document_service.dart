@@ -37,6 +37,9 @@ class DocumentService {
   }
 
   /// Saves a file and returns a **relative** path (e.g. `my_vehicles_docs/file.pdf`).
+  ///
+  /// Throws [FileSystemException] if the source is missing or the copy fails,
+  /// so callers never store a reference to a file that isn't on disk.
   static Future<String> saveFile(String sourcePath, String filename) async {
     final dir = await _docsDir;
     final ext = p.extension(sourcePath);
@@ -48,8 +51,14 @@ class DocumentService {
     final sourceFile = File(sourcePath);
     if (!await sourceFile.exists()) {
       debugPrint('DocumentService: source file not found: $sourcePath');
-    } else {
-      await sourceFile.copy(destPath);
+      throw FileSystemException('Source file not found', sourcePath);
+    }
+    await sourceFile.copy(destPath);
+
+    // Guard against a silent partial/failed copy.
+    if (!await File(destPath).exists()) {
+      debugPrint('DocumentService: copy did not produce $destPath');
+      throw FileSystemException('Failed to save file', destPath);
     }
 
     // Return relative path for storage

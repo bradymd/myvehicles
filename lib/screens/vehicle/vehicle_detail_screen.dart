@@ -175,11 +175,11 @@ class VehicleDetailScreen extends ConsumerWidget {
                         subtitle: (vehicle.ownership == 'leased' ||
                                 vehicle.ownership == 'pch')
                             ? 'N/A (Leased)'
-                            : _dateSubtitle(vehicle.taxDueDate),
+                            : _taxSubtitle(vehicle),
                         subtitleColor: (vehicle.ownership == 'leased' ||
                                 vehicle.ownership == 'pch')
                             ? AppColors.textMuted
-                            : _dateColor(vehicle.taxDueDate),
+                            : _taxColor(vehicle),
                         color: const Color(0xFF00695C),
                         onTap: () => context
                             .push('/car-tax-info/${vehicle.id}'),
@@ -274,6 +274,18 @@ class VehicleDetailScreen extends ConsumerWidget {
   String _dateSubtitle(String dateStr) {
     if (dateStr.isEmpty) return 'Not set';
     return formatDateRelative(dateStr);
+  }
+
+  // Tax respects the DVLA "Taxed" status: a confirmed-taxed vehicle is never
+  // shown as expired, even if the stored due date has passed.
+  String _taxSubtitle(Vehicle vehicle) {
+    if (isTaxConfirmed(vehicle.taxStatus)) return 'Taxed';
+    return _dateSubtitle(vehicle.taxDueDate);
+  }
+
+  Color _taxColor(Vehicle vehicle) {
+    if (isTaxConfirmed(vehicle.taxStatus)) return AppColors.success;
+    return _dateColor(vehicle.taxDueDate);
   }
 
   Color _dateColor(String dateStr) {

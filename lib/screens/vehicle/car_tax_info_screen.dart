@@ -239,6 +239,9 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
   Widget _buildDisplay(Vehicle vehicle) {
     final dateStr = vehicle.taxDueDate;
     final days = daysUntil(dateStr);
+    // DVLA confirmed taxed — don't show a red "expired" warning even if the
+    // stored due date has passed (see isTaxConfirmed).
+    final confirmedTaxed = isTaxConfirmed(vehicle.taxStatus);
 
     // Show "Check with DVLA" when vehicle is DVLA-verified and tax is expired or due within 30 days
     final showDvlaCheck = vehicle.dvlaVerified &&
@@ -254,49 +257,50 @@ class _CarTaxInfoScreenState extends ConsumerState<CarTaxInfoScreen> {
         _infoRow('Tax Due Date', dateStr.isNotEmpty ? formatDateUK(dateStr) : ''),
         if (dateStr.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: days < 0
-                  ? AppColors.softRed
-                  : days <= 30
-                      ? AppColors.softOrange
-                      : AppColors.softGreen,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  days < 0
-                      ? Icons.error_rounded
-                      : days <= 30
-                          ? Icons.warning_amber_rounded
-                          : Icons.check_circle_rounded,
-                  color: days < 0
-                      ? AppColors.danger
-                      : days <= 30
-                          ? AppColors.warning
-                          : AppColors.success,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    days < 0
-                        ? 'Tax expired ${-days} days ago'
-                        : 'Tax due ${formatDateRelative(dateStr)}',
-                    style: AppTextStyles.bodyBold.copyWith(
-                      color: days < 0
-                          ? AppColors.danger
-                          : days <= 30
-                              ? AppColors.warning
-                              : AppColors.success,
+          Builder(builder: (context) {
+            final showExpired = days < 0 && !confirmedTaxed;
+            final showWarning = !confirmedTaxed && days >= 0 && days <= 30;
+            final boxColor = showExpired
+                ? AppColors.softRed
+                : showWarning
+                    ? AppColors.softOrange
+                    : AppColors.softGreen;
+            final fgColor = showExpired
+                ? AppColors.danger
+                : showWarning
+                    ? AppColors.warning
+                    : AppColors.success;
+            final boxIcon = showExpired
+                ? Icons.error_rounded
+                : showWarning
+                    ? Icons.warning_amber_rounded
+                    : Icons.check_circle_rounded;
+            final boxText = confirmedTaxed
+                ? 'Taxed'
+                : days < 0
+                    ? 'Tax expired ${-days} days ago'
+                    : 'Tax due ${formatDateRelative(dateStr)}';
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: boxColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(boxIcon, color: fgColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      boxText,
+                      style: AppTextStyles.bodyBold.copyWith(color: fgColor),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          }),
         ],
         if (showDvlaCheck) ...[
           const SizedBox(height: 12),

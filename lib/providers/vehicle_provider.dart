@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_vehicles/models/vehicle.dart';
 import 'package:my_vehicles/providers/database_provider.dart';
+import 'package:my_vehicles/services/dvla_refresh_service.dart';
 import 'package:my_vehicles/utils/id_generator.dart';
 
 final selectedVehicleIdProvider = StateProvider<String?>((ref) => null);
@@ -44,5 +45,17 @@ class VehiclesNotifier extends AsyncNotifier<List<Vehicle>> {
     final db = ref.read(databaseProvider);
     await db.deleteVehicle(id);
     ref.invalidateSelf();
+  }
+
+  /// Refreshes DVLA tax/MOT data for verified vehicles when due, then reloads
+  /// so alerts reflect the latest status. Best-effort — never throws.
+  Future<void> refreshFromDvlaIfDue() async {
+    try {
+      final db = ref.read(databaseProvider);
+      final changed = await DvlaRefreshService.refreshIfDue(db);
+      if (changed) ref.invalidateSelf();
+    } catch (e) {
+      // Background refresh is best-effort; ignore failures.
+    }
   }
 }

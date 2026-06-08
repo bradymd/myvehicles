@@ -83,8 +83,19 @@ class DocumentsScreen extends ConsumerWidget {
     final file = result.files.first;
     if (file.path == null) return;
 
-    final savedPath = await DocumentService.saveFile(
-        file.path!, file.name);
+    final String savedPath;
+    try {
+      savedPath = await DocumentService.saveFile(file.path!, file.name);
+    } catch (e) {
+      debugPrint('Failed to save document: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Couldn't save the document. Please try again.")),
+        );
+      }
+      return;
+    }
 
     final doc = DocumentRef(
       id: generateId(),
